@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { ActionTypeKeys, ActionTypes } from 'actions/myActions';
-import { IMyState } from 'store/IStoreState';
+import { IMyState } from '../store/IStoreState';
 import produce from 'immer';
+import { Actions } from 'actions/actionTypes';
 
 const initialState = {
   email: '',
@@ -16,10 +16,10 @@ const initialState = {
   isFetchingMe: false,
 };
 
-const myState = (state: IMyState = initialState, action: ActionTypes) =>
+const myState = (state: IMyState = initialState, action: Actions) =>
   produce(state, draft => {
     switch (action.type) {
-      case ActionTypeKeys.UPDATE_ME: {
+      case 'UPDATE_ME': {
         const {
           email,
           firstName,
@@ -41,15 +41,6 @@ const myState = (state: IMyState = initialState, action: ActionTypes) =>
         draft.id = id;
         draft.fetchResolved = true;
         draft.isFetchingMe = false;
-        return;
-      }
-      case ActionTypeKeys.UPDATE_FETCH_ME_REQUEST: {
-        draft.isFetchingMe = true;
-        return;
-      }
-      case ActionTypeKeys.UPDATE_FETCH_ME_FAILURE: {
-        draft.isFetchingMe = false;
-        draft.fetchResolved = true;
         return;
       }
       default:

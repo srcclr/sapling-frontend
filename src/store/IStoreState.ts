@@ -1,43 +1,68 @@
-import { IFuelSavings, IBoard, IEpic } from 'types';
+import { IBoard, IEpic, IError } from '../types';
 import { FormStateMap } from 'redux-form';
 export default interface IStoreState {
   readonly form: FormStateMap;
-  readonly fuelSavings: IFuelSavings;
   readonly epicsListState: IEpicsListState;
   readonly boardListState: IBoardListState;
   readonly boardState: IBoardState;
+  readonly newBoardState: IBoardState;
   readonly loginState: ILoginState;
   readonly myState: IMyState;
 }
 
 export interface IBoardListState {
-  data: IBoard[];
-  isFetchingBoardList: boolean;
-  errorMessage: string;
+  data?: IBoard[];
+  isFetching?: boolean;
+  errorMessage?: string;
 }
 
 export interface IEpicsListState {
   data: IEpic[];
+  isCreatingEpic: boolean;
   isFetchingEpicsList: boolean;
   errorMessage: string;
+  epicAsyncCallStateById?: {
+    [id: string]: {
+      isLoading?: boolean;
+      isSuccess?: boolean;
+      isFailure?: boolean;
+    };
+  };
 }
 
 export interface IBoardState {
   data?: IBoard;
-  isFetchingBoard?: boolean;
+  isSolving?: boolean;
+  isFetching?: boolean;
   isUpdatingBoard?: boolean;
   isAddingDependency?: boolean;
+  isDeletingDependency?: boolean;
+  isCreatingSprint?: boolean;
   isExportingCsv?: boolean;
   dependant?: number;
   shownDependencies?: number[];
   errorMessage?: string;
+  sprintAsyncCallStateById?: {
+    [id: string]: {
+      isLoading?: boolean;
+      isSuccess?: boolean;
+      isFailure?: boolean;
+    };
+  };
+  storyAsyncCallStateById?: {
+    [id: string]: {
+      isLoading?: boolean;
+      isSuccess?: boolean;
+      isFailure?: boolean;
+    };
+  };
 }
 
 export interface ILoginState {
   isLoggingIn?: boolean;
   isFetchingToken?: boolean;
   query?: string;
-  errorMessage?: string;
+  error?: IError;
 }
 
 export interface IMyState {

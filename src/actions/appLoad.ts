@@ -6,9 +6,7 @@ import IStoreState from 'store/IStoreState';
 import { SESSION_ID_HASH_RE } from 'constants/index';
 import { IEmptyAction } from 'actions/sharedActions';
 
-import { getActions as getMyActions } from 'actions/myActions';
-
-const myActions = getMyActions();
+import { updateMe, fetchMe } from 'actions/myActions';
 
 export function checkUserStatus(history) {
   return async (dispatch: ThunkDispatch<IStoreState, void, Action>) => {
@@ -18,15 +16,16 @@ export function checkUserStatus(history) {
 
     const hashMatch = SESSION_ID_HASH_RE.exec(hash);
     // Perform a fetch of user profile to check if logged in
-    dispatch(myActions.fetchMe()).then(res => {
-      const { id } = res;
+    dispatch(fetchMe()).then(res => {
+      const { data } = res;
+      const { id } = data;
       const isLoggedIn = !!id;
 
       // If you have researcher role you are logged in
       if (isLoggedIn) {
-        dispatch(myActions.updateMe(res));
+        dispatch(updateMe(data));
 
-        // If a logged-in user is trying to access /login, redirect to /entries
+        // If a logged-in user is trying to access /login, redirect to /boards
         if (pathname.indexOf('/login') !== -1) {
           history.replace(`/boards`);
         } else {
@@ -43,21 +42,3 @@ export function checkUserStatus(history) {
     });
   };
 }
-
-// Interface of actions
-
-export interface IAppLoadActions extends ActionCreatorsMapObject<any> {
-  checkUserStatus: typeof checkUserStatus;
-}
-
-// Expose actions
-
-export function getActions(): IAppLoadActions {
-  return {
-    checkUserStatus,
-  };
-}
-
-// Union of all action types
-
-export type AppLoadActionTypes = IAppLoadActions | IEmptyAction;

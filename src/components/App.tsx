@@ -1,64 +1,36 @@
 /* eslint-disable import/no-named-as-default */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { hot } from 'react-hot-loader';
-import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { Route, Switch, withRouter, Redirect, useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { bindActionCreators, ActionCreatorsMapObject } from 'redux';
+import { toast } from 'react-toastify';
 
-import Board from 'containers/Board';
-import BoardList from 'containers/BoardList';
-import Login from 'containers/Login';
+import Login from 'components/Login';
+import BoardList from 'components/BoardList';
 
-import { IMyState } from 'store/IStoreState';
-import { getActions } from 'actions/appLoad';
+import { checkUserStatus } from 'actions/appLoad';
+import Board from 'components/Board';
 
-// This is a class-based component because the current
-// version of hot reloading won't hot reload a stateless
-// component at the top-level.
+toast.configure({ hideProgressBar: true });
 
-interface IAppProps {
-  history: any;
-  myState: IMyState;
+export function App() {
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const actions = bindActionCreators<{}, ActionCreatorsMapObject>({ checkUserStatus }, dispatch);
+  useEffect(() => {
+    actions.checkUserStatus(history);
+  }, []);
+  return (
+    <div className="flex flex-col items-stretch relative">
+      <Switch>
+        <Redirect exact path="/" to={'/login'} />
+        <Route exact path="/login" component={Login} />
+        <Route exact path="/boards" component={BoardList} />
+        <Route exact path="/boards/:boardId" component={Board} />
+      </Switch>
+    </div>
+  );
 }
 
-class App extends React.Component<IAppProps & ReturnType<typeof mapDispatchToProps>> {
-  public componentDidMount() {
-    const { history } = this.props;
-
-    this.props.actions.checkUserStatus(history);
-  }
-
-  public render() {
-    const activeStyle = { color: 'blue' };
-    return (
-      <div className="col-12">
-        <div>
-          <Switch>
-            <Redirect exact path="/" to={'/login'} />
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/boards/:boardId" component={Board} />
-            <Route exact path="/boards" component={BoardList} />
-          </Switch>
-        </div>
-      </div>
-    );
-  }
-}
-
-function mapStateToProps(state: any) {
-  return {};
-}
-
-function mapDispatchToProps(dispatch: any) {
-  return {
-    actions: bindActionCreators(getActions(), dispatch),
-  };
-}
-
-export default hot(module)(
-  withRouter(connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(App) as any)
-);
+export default hot(module)(withRouter(App));

@@ -1,0 +1,442 @@
+@tailwind base;
+@tailwind components;
+
+* {
+  animation: fade-in 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+
+body {
+  @apply text-gray-700;
+}
+
+a {
+  @apply text-teal-400;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  @apply text-teal-600;
+}
+
+.btn {
+  @apply py-2 px-4 rounded text-white;
+  transition: background-color 0.2s ease;
+}
+
+.btn:disabled {
+  @apply bg-gray-100;
+}
+
+.btn:focus {
+  @apply outline-none;
+}
+
+.btn-minimal {
+  @apply bg-transparent text-gray-600 bg-gray-200;
+}
+
+.btn-minimal:hover {
+  @apply bg-gray-300;
+}
+
+.btn-primary {
+  @apply bg-teal-400;
+}
+
+.btn-primary:hover {
+  @apply bg-teal-500;
+}
+
+.btn-danger {
+  @apply bg-red-400;
+}
+
+.btn-danger:hover {
+  @apply bg-red-500;
+}
+
+.btn:disabled,
+.btn-primary:disabled {
+  @apply bg-gray-200 text-gray-300 shadow-none;
+}
+
+.alert {
+  @apply bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative;
+}
+
+input,
+select {
+  @apply outline-none bg-gray-100 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight;
+}
+
+input:focus {
+  @apply outline-none bg-white border-teal-500;
+}
+
+input.minimal {
+  border: 0;
+  @apply border-b-2 border-dotted border-gray-300 bg-transparent py-1;
+}
+
+select {
+  @apply outline-none;
+}
+
+textarea {
+  @apply outline-none;
+}
+
+.overlay {
+  @apply fixed top-0 left-0 right-0 bottom-0 z-50 overflow-auto bg-smoke-light flex;
+  animation: fade-in 0.4s ease;
+}
+
+.dialog {
+  @apply border p-6 bg-white rounded-md;
+}
+
+.tag {
+  @apply bg-gray-200 p-1 text-gray-600 text-xs rounded-sm;
+}
+
+.clickable {
+  @apply text-gray-400 cursor-pointer;
+}
+
+.clickable:hover {
+  @apply text-teal-400;
+}
+
+@tailwind utilities;
+
+.actionline .content {
+  @apply h-1 flex-grow border-t-2 text-gray-600 border-dotted border-gray-300 pl-2;
+  transition: height 0.2s ease;
+
+  handle {
+    @apply text-gray-400;
+  }
+
+  > * {
+    animation: fade-in 0.4s ease;
+    @apply hidden;
+  }
+}
+
+.actionline:hover {
+  .handle {
+    @apply cursor-pointer;
+    @apply text-teal-400;
+  }
+
+  .content {
+    @apply h-8 border-2 border-teal-200;
+    @apply cursor-pointer;
+
+    > * {
+      @apply block;
+    }
+  }
+}
+
+.story {
+  @apply mb-4 mr-4 h-32 max-w-sm w-64 relative overflow-hidden;
+}
+
+.story:hover {
+  @apply overflow-visible;
+}
+
+.story:hover .inner {
+  @apply z-10 h-64 rounded-sm;
+}
+
+.story .inner {
+  @apply absolute w-full bg-white p-4 h-32;
+  transition: height 0.2s ease;
+}
+
+.story .inner-plain {
+  @apply h-32;
+  transition: height 0.2s ease;
+}
+
+.animation-fade-in {
+  animation-name: fade-in;
+}
+
+.animation-400ms {
+  animation-duration: 400ms;
+}
+
+.animation-200ms {
+  animation-duration: 200ms;
+}
+
+/** 
+* Spinner fanciness here
+*/
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.square-spinner {
+  display: block;
+  margin: 0 auto;
+  width: 29px;
+  height: 29px;
+  position: relative;
+  @apply border-4 rounded-md border-teal-500;
+  animation: square-spinner 2.3s infinite ease;
+  -o-animation: square-spinner 2.3s infinite ease;
+  -ms-animation: square-spinner 2.3s infinite ease;
+  -webkit-animation: square-spinner 2.3s infinite ease;
+  -moz-animation: square-spinner 2.3s infinite ease;
+}
+
+.square-spinner-inner {
+  vertical-align: top;
+  display: inline-block;
+  width: 100%;
+  @apply bg-teal-500;
+  animation: square-spinner-inner 2.3s infinite ease-in;
+  -o-animation: square-spinner-inner 2.3s infinite ease-in;
+  -ms-animation: square-spinner-inner 2.3s infinite ease-in;
+  -webkit-animation: square-spinner-inner 2.3s infinite ease-in;
+  -moz-animation: square-spinner-inner 2.3s infinite ease-in;
+}
+
+@keyframes square-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(180deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  75% {
+    transform: rotate(360deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-o-keyframes square-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(180deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  75% {
+    transform: rotate(360deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-ms-keyframes square-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(180deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  75% {
+    transform: rotate(360deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes square-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(180deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  75% {
+    transform: rotate(360deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes square-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(180deg);
+  }
+
+  50% {
+    transform: rotate(180deg);
+  }
+
+  75% {
+    transform: rotate(360deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes square-spinner-inner {
+  0% {
+    height: 0%;
+  }
+
+  25% {
+    height: 0%;
+  }
+
+  50% {
+    height: 100%;
+  }
+
+  75% {
+    height: 100%;
+  }
+
+  100% {
+    height: 0%;
+  }
+}
+
+@-o-keyframes square-spinner-inner {
+  0% {
+    height: 0%;
+  }
+
+  25% {
+    height: 0%;
+  }
+
+  50% {
+    height: 100%;
+  }
+
+  75% {
+    height: 100%;
+  }
+
+  100% {
+    height: 0%;
+  }
+}
+
+@-ms-keyframes square-spinner-inner {
+  0% {
+    height: 0%;
+  }
+
+  25% {
+    height: 0%;
+  }
+
+  50% {
+    height: 100%;
+  }
+
+  75% {
+    height: 100%;
+  }
+
+  100% {
+    height: 0%;
+  }
+}
+
+@-webkit-keyframes square-spinner-inner {
+  0% {
+    height: 0%;
+  }
+
+  25% {
+    height: 0%;
+  }
+
+  50% {
+    height: 100%;
+  }
+
+  75% {
+    height: 100%;
+  }
+
+  100% {
+    height: 0%;
+  }
+}
+
+@-moz-keyframes square-spinner-inner {
+  0% {
+    height: 0%;
+  }
+
+  25% {
+    height: 0%;
+  }
+
+  50% {
+    height: 100%;
+  }
+
+  75% {
+    height: 100%;
+  }
+
+  100% {
+    height: 0%;
+  }
+}

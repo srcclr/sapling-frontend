@@ -1,26 +1,9 @@
-export interface IFuelSavings {
-  newMpg?: number | string;
-  tradeMpg?: number | string;
-  newPpg?: number | string;
-  tradePpg?: number | string;
-  milesDriven?: number | string;
-  milesDrivenTimeframe?: string;
-  displayResults?: boolean;
-  dateModified?: string;
-  necessaryDataIsProvidedToCalculateSavings?: boolean;
-  savings?: ISavings;
-}
+import { IAddNewSprintFailureAction } from 'v1/actions/boardActions';
 
 export interface ILoginParams {
   username?: string;
   email?: string;
   password: string;
-}
-
-export interface ISavings {
-  monthly?: number | string;
-  annual?: number | string;
-  threeYear?: number | string;
 }
 
 export interface IBoard {
@@ -41,10 +24,11 @@ export interface ISprint {
   id?: number;
   name?: string;
   capacity?: number;
-  tickets?: ITicket[];
+  goal?: IAddNewSprintFailureAction;
+  tickets?: IStory[];
 }
 
-export interface ITicket {
+export interface IStory {
   id?: number;
   dependencies?: number[];
   description?: string;
@@ -52,4 +36,24 @@ export interface ITicket {
   weight?: number;
   epic?: number;
   pin?: number;
+}
+
+export interface IError {
+  error?: {
+    message?: string;
+    error?: string;
+    status?: number;
+  };
+  formattedErrorMessage?: string;
+}
+
+export interface IMyPayload {
+  email: string;
+  firstName: string;
+  id: number;
+  lastName: string;
+  orgSlug: string;
+  researcher: boolean;
+  roles: string[];
+  username: string;
 }

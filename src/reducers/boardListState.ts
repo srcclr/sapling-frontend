@@ -1,38 +1,27 @@
 import _ from 'lodash';
-import { ActionTypes, ActionTypeKeys } from 'actions/boardActions';
-import { IBoardListState } from 'store/IStoreState';
+import { Actions } from 'actions/actionTypes';
+import { IBoardListState } from '../store/IStoreState';
 import produce from 'immer';
-
+import { asyncActionReducer } from 'utils/Helpers';
 const initialState = {
-  isFetchingBoardList: false,
   data: [],
+  isFetching: false,
+  isCreating: false,
   errorMessage: '',
 };
 
-const boardListState = (state: IBoardListState = initialState, action: ActionTypes) =>
+const boardListState = (state: IBoardListState = initialState, action: Actions) =>
   produce(state, draft => {
-    let payload;
     switch (action.type) {
-      case ActionTypeKeys.RESET_BOARD: {
-        draft.data = [];
-        draft.isFetchingBoardList = false;
+      case 'FETCH_BOARD_LIST': {
+        asyncActionReducer(draft, action, ['isFetching'], () => {
+          const { data } = action.payload.success;
+          draft.data = data;
+        });
         return;
       }
-      case ActionTypeKeys.FETCH_BOARD_LIST_REQUEST: {
-        draft.isFetchingBoardList = true;
-        return;
-      }
-      case ActionTypeKeys.FETCH_BOARD_LIST_SUCCESS: {
-        payload = action.payload;
-        const { data } = payload;
-        draft.errorMessage = '';
-        draft.data = data || {};
-        draft.isFetchingBoardList = false;
-        return;
-      }
-      case ActionTypeKeys.FETCH_BOARD_LIST_FAILURE: {
-        draft.errorMessage = '';
-        draft.isFetchingBoardList = false;
+      case 'CREATE_BOARD': {
+        asyncActionReducer(draft, action, ['isCreating']);
         return;
       }
       default:

@@ -1,38 +1,40 @@
 import _ from 'lodash';
-import { ActionTypes, ActionTypeKeys } from 'actions/epicsActions';
-import { IEpicsListState } from 'store/IStoreState';
+import { Actions } from 'actions/actionTypes';
+import { IEpicsListState } from '../store/IStoreState';
 import produce from 'immer';
+import { asyncActionReducer, asyncActionReducerById } from 'utils/Helpers';
 
 const initialState = {
   isFetchingEpicsList: false,
+  isCreatingEpic: false,
   data: [],
   errorMessage: '',
+  epicAsyncCallStateById: {},
 };
 
-const epicsListState = (state: IEpicsListState = initialState, action: ActionTypes) =>
+const epicsListState = (state: IEpicsListState = initialState, action: Actions) =>
   produce(state, draft => {
-    let payload;
     switch (action.type) {
-      case ActionTypeKeys.RESET_BOARD: {
-        draft.data = [];
-        draft.isFetchingEpicsList = false;
+      case 'FETCH_EPICS_LIST': {
+        asyncActionReducer(draft, action, ['isFetchingEpicsList'], () => {
+          const { data } = action.payload.success;
+          draft.data = data;
+        });
         return;
       }
-      case ActionTypeKeys.FETCH_EPICS_LIST_REQUEST: {
-        draft.isFetchingEpicsList = true;
+      case 'CREATE_EPIC': {
+        asyncActionReducer(draft, action, ['isCreatingEpic'], () => {
+          const { data: newEpic } = action.payload.success;
+          draft.data = [...draft.data, newEpic];
+        });
         return;
       }
-      case ActionTypeKeys.FETCH_EPICS_LIST_SUCCESS: {
-        payload = action.payload;
-        const { data } = payload;
-        draft.errorMessage = '';
-        draft.data = data || {};
-        draft.isFetchingEpicsList = false;
-        return;
-      }
-      case ActionTypeKeys.FETCH_EPICS_LIST_FAILURE: {
-        draft.errorMessage = '';
-        draft.isFetchingEpicsList = false;
+      case 'DELETE_EPIC': {
+        const { data } = action.payload.request;
+        const { epicId } = data;
+        asyncActionReducerById(draft, action, epicId, ['epicAsyncCallStateById'], () => {
+          draft.data = draft.data && draft.data.filter(epic => epic.id !== epicId);
+        });
         return;
       }
       default:

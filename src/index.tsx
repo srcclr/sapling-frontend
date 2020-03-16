@@ -3,20 +3,15 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
-import configureStore, { history } from './store/configureStore';
-import Root from 'components/Root';
+import configureStore, { history } from 'store/configureStore';
+import Root from './components/Root';
 import './styles/styles.scss';
-
-interface IWindowModuleHot extends Window {
-  module: {
-    hot: {
-      accept: (path: string, callback: () => void) => void;
-    };
-  };
-}
+import './styles/x.css';
+import 'react-toastify/dist/ReactToastify.css';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 const store = configureStore();
-const hotWindow = window as IWindowModuleHot;
+const hotWindow = window;
 
 render(
   <AppContainer>

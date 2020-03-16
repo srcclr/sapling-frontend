@@ -1,6 +1,5 @@
-import React, { Component, ObjectHTMLAttributes } from 'react';
-import PropTypes from 'prop-types';
-import { ConnectedRouter } from 'connected-react-router';
+import React, { Component } from 'react';
+import { ConnectedRouter } from 'connected-react-router/immutable';
 import { History } from 'history';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';

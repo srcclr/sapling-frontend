@@ -6,6 +6,9 @@ import HardSourceWebpackPlugin from 'hard-source-webpack-plugin';
 export default {
   resolve: {
     extensions: ['*', '.js', '.jsx', '.ts', '.tsx', '.json'],
+    alias: {
+      'react-dom': '@hot-loader/react-dom',
+    },
   },
   devtool: 'cheap-module-eval-source-map', // more info:https://webpack.js.org/guides/development/#using-source-maps and https://webpack.js.org/configuration/devtool/
   entry: [
@@ -95,7 +98,7 @@ export default {
         ],
       },
       {
-        test: /(\.css|\.scss|\.sass)$/,
+        test: /(\.css)$/,
         use: [
           'style-loader',
           {
@@ -107,7 +110,30 @@ export default {
           {
             loader: 'postcss-loader',
             options: {
-              plugins: () => [require('autoprefixer')],
+              plugins: () => [
+                require('postcss-import'),
+                require('tailwindcss'),
+                require('autoprefixer'),
+              ],
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              includePaths: [path.resolve(__dirname, 'src', 'scss')],
+              sourceMap: true,
+            },
+          },
+        ],
+      },
+      {
+        test: /(\.scss|\.sass)$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
               sourceMap: true,
             },
           },

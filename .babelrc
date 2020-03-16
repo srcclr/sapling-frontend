@@ -11,7 +11,9 @@
           "reducers": "./src/reducers",
           "constants": "./src/constants",
           "types": "./src/types",
-          "utils": "./src/utils"
+          "utils": "./src/utils",
+          "hooks": "./src/hooks",
+          "styles": "./src/styles"
         }
       }
     ]
