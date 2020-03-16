@@ -1,0 +1,64 @@
+{
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "root": ["./src"],
+        "alias": {
+          "containers": "./src/containers",
+          "components": "./src/components",
+          "actions": "./src/actions",
+          "reducers": "./src/reducers",
+          "constants": "./src/constants",
+          "types": "./src/types",
+          "utils": "./src/utils"
+        }
+      }
+    ]
+  ],
+  "env": {
+    "development": {
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "targets": { "node": "current" }
+          }
+        ],
+        "@babel/preset-react",
+        "@babel/typescript"
+      ],
+      "plugins": [
+        "@babel/plugin-proposal-class-properties",
+        "@babel/plugin-proposal-object-rest-spread",
+        "react-hot-loader/babel"
+      ]
+    },
+    "production": {
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "targets": {
+              "ie": 9
+            },
+            "forceAllTransforms": true
+          }
+        ],
+        "@babel/preset-react",
+        "@babel/typescript"
+      ],
+      "plugins": [
+        "@babel/plugin-proposal-class-properties",
+        "@babel/plugin-transform-react-constant-elements",
+        "@babel/plugin-proposal-object-rest-spread",
+        "@babel/plugin-transform-runtime",
+        "transform-react-remove-prop-types"
+      ]
+    },
+    "test": {
+      "presets": ["@babel/preset-env", "@babel/preset-react"],
+      "plugins": ["@babel/plugin-proposal-class-properties"]
+    }
+  }
+}
