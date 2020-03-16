@@ -138,7 +138,11 @@ export default {
           {
             loader: 'postcss-loader',
             options: {
-              plugins: () => [require('cssnano'), require('autoprefixer')],
+              plugins: () => [
+                require('postcss-import'),
+                require('tailwindcss'),
+                require('autoprefixer'),
+              ],
               sourceMap: true,
             },
           },
