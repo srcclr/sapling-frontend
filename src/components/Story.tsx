@@ -50,15 +50,12 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   const pinValue = getNumberValue(pin);
   const epicValue = getNumberValue(epic);
 
-  const delayedEdit = _.debounce(story => onEdit(story), 1000);
-
   const handleFormSubmit = values => {
-    const valuesObj = {
+    event.preventDefault();
+    onEdit({
       id,
       ...values,
-    };
-    event.preventDefault();
-    delayedEdit(valuesObj);
+    });
   };
 
   const handleAddingDependency = () => {
@@ -144,7 +141,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                     ref={register({ required: true })}
                   />
                   <div className="flex flex-row items-center w-full text-xs">
-                    <div className="mr-1">Weight</div>
+                    <div className="mr-1">Story Points</div>
                     <input
                       className="w-full mb-2 placeholder-gray-500 w-full minimal"
                       type="number"
@@ -243,7 +240,7 @@ const DependencyCandidateView = ({ id, description, weight, epicName, onClick })
     <div className="inner-plain flex p-3 hover:shadow-lg cursor-pointer bg-white" onClick={onClick}>
       <div className="flex-grow opacity-75">
         <div className="text-sm font-semibold mb-1">{description} </div>
-        <div className="text-sm ">Weight: {weight} </div>
+        <div className="text-sm ">Story Points: {weight} </div>
         <div className="text-sm ">Epic: {epicName} </div>
       </div>
       <div>
@@ -258,7 +255,7 @@ const DetailsView = ({ id, description, weight, epicName, sprintName, onClick })
     <div className="w-full flex cursor-pointer bg-white" onClick={onClick}>
       <div className="flex-grow">
         <div className="text-sm font-semibold mb-2">{description} </div>
-        <div className="text-sm ">Weight: {weight} </div>
+        <div className="text-sm ">Story Points: {weight} </div>
         <div className="text-sm ">Epic: {epicName} </div>
         {sprintName && <div className="text-sm ">Pin: {sprintName} </div>}
       </div>

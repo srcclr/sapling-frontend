@@ -20,8 +20,8 @@ export const actionsMiddleware = ({ dispatch }) => next => action => {
     payload,
   });
 
-  return callApi().then(
-    response => {
+  return callApi()
+    .then(response => {
       dispatch({
         type,
         subType: 'SUCCESS',
@@ -36,8 +36,8 @@ export const actionsMiddleware = ({ dispatch }) => next => action => {
       return {
         data: response,
       };
-    },
-    error => {
+    })
+    .catch(error => {
       const errorMessage = getError(error);
 
       dispatch({
@@ -52,6 +52,5 @@ export const actionsMiddleware = ({ dispatch }) => next => action => {
       });
 
       throw errorMessage;
-    }
-  );
+    });
 };

@@ -11,7 +11,7 @@ const DependencyModeModal = ({ story, onCancel }) => {
             <div className="tag mr-2 rounded-lg">{id}</div>
             <div>
               <div>{description}</div>
-              <div>Weight {weight}</div>
+              <div>Story Points: {weight}</div>
             </div>
           </div>
           <div>

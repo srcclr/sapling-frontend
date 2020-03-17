@@ -113,9 +113,11 @@ function Board() {
 
   const handleEditStory = story => {
     actions.updateStory(id, story).catch(() => {
-      toast.error('Error updating sprint');
+      toast.error('Error updating story');
     });
   };
+
+  const delayedHandleEditStory = _.debounce(story => handleEditStory(story), 1000);
 
   const handleCreateStory = (description, weight) => {
     // todo: hack to assign to the first epic in the list
@@ -282,7 +284,7 @@ function Board() {
                                         key={i}
                                         {...story}
                                         onDelete={id => handleDeleteStory(id, sprintId)}
-                                        onEdit={handleEditStory}
+                                        onEdit={delayedHandleEditStory}
                                         isLoading={isStoryLoading}
                                         epics={epics}
                                         sprints={sprints}
@@ -336,7 +338,7 @@ function Board() {
                                 key={i}
                                 {...story}
                                 onDelete={handleDeleteStory}
-                                onEdit={handleEditStory}
+                                onEdit={delayedHandleEditStory}
                                 isLoading={isStoryLoading}
                                 epics={epics}
                                 sprints={sprints}
