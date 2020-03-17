@@ -77,12 +77,7 @@ class ApiService implements IApiService {
             }
 
             if (!requestType) {
-              // if (isLoggingIn) {
-              //   // the login request is special and needs to be sent as x-www-form-urlencoded
-              //   request.type('form');
-              // } else {
               request.type('application/json');
-              // }
             }
 
             if (params) {

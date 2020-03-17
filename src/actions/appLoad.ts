@@ -16,29 +16,28 @@ export function checkUserStatus(history) {
 
     const hashMatch = SESSION_ID_HASH_RE.exec(hash);
     // Perform a fetch of user profile to check if logged in
-    dispatch(fetchMe()).then(res => {
-      const { data } = res;
-      const { id } = data;
-      const isLoggedIn = !!id;
+    dispatch(fetchMe())
+      .then(res => {
+        const { data } = res;
+        const { id } = data;
+        const isLoggedIn = !!id;
 
-      // If you have researcher role you are logged in
-      if (isLoggedIn) {
-        dispatch(updateMe(data));
+        // If you have researcher role you are logged in
+        if (isLoggedIn) {
+          dispatch(updateMe(data));
 
-        // If a logged-in user is trying to access /login, redirect to /boards
-        if (pathname.indexOf('/login') !== -1) {
-          history.replace(`/boards`);
+          // If a logged-in user is trying to access /login, redirect to /boards
+          if (pathname.indexOf('/login') !== -1) {
+            history.replace(`/boards`);
+          } else {
+            history.replace(`${pathname}${search}`);
+          }
         } else {
-          history.replace(`${pathname}${search}`);
+          history.push('/login');
         }
-      } else if (hashMatch && hashMatch.length) {
-        // You're not logged in but a hash exists indicating attempt to login
-        const sessionToken = hashMatch[1] || '';
-        AuthService.setAuthToken(sessionToken);
-        history.replace(`/boards`);
-      } else {
+      })
+      .catch(() => {
         history.push('/login');
-      }
-    });
+      });
   };
 }

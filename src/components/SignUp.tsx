@@ -1,49 +1,23 @@
 import React from 'react';
-import { connect, useSelector, useDispatch } from 'react-redux';
-import AuthService from 'utils/AuthService';
-import { bindActionCreators } from 'redux';
+import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { getLoginErrorMessage } from 'utils/Helpers';
-import { loginWithUserName } from 'actions/login';
-import { BoundActionsObjectMap } from 'actions/actionTypes';
-import IStoreState, { ILoginState, IMyState } from 'store/IStoreState';
-import { ILoginParams } from '../types';
+
 import Loader from 'react-loader-spinner';
 
-function Login() {
-  const loginState = useSelector<IStoreState, ILoginState>(state => state.loginState);
-  const dispatch = useDispatch();
-  const actions = bindActionCreators<{}, BoundActionsObjectMap>({ loginWithUserName }, dispatch);
-  const loginWithUsername = e => {
-    e.preventDefault();
+// TODO
+function SignUp() {
+  const errorMessage = '';
+  const isSigningUp = false;
 
-    const { target = {} } = e;
-    const { username, password } = target;
+  const { register, errors, handleSubmit, watch } = useForm();
 
-    const params: ILoginParams = {
-      email: username.value,
-      password: password.value,
-    };
-
-    actions.loginWithUserName(params).then(res => {
-      const { data } = res;
-      const { header } = data;
-      const { ['access_token']: authToken } = header;
-      if (authToken) {
-        AuthService.setAuthToken(authToken);
-        window.location = `/boards` as any;
-      }
-    });
-  };
-
-  const { isFetchingToken, query = {}, error = {}, isLoggingIn } = loginState;
-  const errorMessage = getLoginErrorMessage(error);
+  const onSubmit = values => {};
 
   return (
     <div className="flex items-stretch h-screen">
       <div className="flex-1 max-w-md self-center mx-auto pb-16">
         <h1 className="md:w-2/3 ml-auto font-extrabold mb-6 text-2xl text-teal-500">SAPLING.</h1>
-        {!isLoggingIn &&
+        {!isSigningUp &&
           errorMessage && (
             <div className="text-sm mb-6">
               <div
@@ -56,7 +30,7 @@ function Login() {
               </div>
             </div>
           )}
-        <form className="" onSubmit={loginWithUsername}>
+        <form className="" onSubmit={handleSubmit(onSubmit)}>
           <div className="md:flex md:items-center mb-6">
             <div className="md:w-1/3">
               <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
@@ -70,9 +44,14 @@ function Login() {
                 className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-teal-500"
                 name="username"
                 placeholder="Email"
-                required={true}
+                ref={register({ required: true })}
                 autoFocus
               />
+              <div className="text-sm text-red-300">
+                {errors && errors['username'] && errors['username']['type'] === 'required'
+                  ? 'Required'
+                  : ''}
+              </div>
             </div>
           </div>
           <div className="md:flex md:items-center mb-6">
@@ -85,24 +64,53 @@ function Login() {
               <input
                 autoComplete={'current-password'}
                 type="password"
-                className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-teal-500"
                 name="password"
                 placeholder="Password"
-                required={true}
+                ref={register({ required: true })}
               />
+              <div className="text-sm text-red-300">
+                {errors && errors['password'] && errors['password']['type'] === 'required'
+                  ? 'Required'
+                  : ''}
+              </div>
+            </div>
+          </div>
+          <div className="md:flex md:items-center mb-6">
+            <div className="md:w-1/3">
+              <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                Confirm password
+              </label>
+            </div>
+            <div className="md:w-2/3">
+              <input
+                type="text"
+                name="confirmPassword"
+                ref={register({
+                  validate: value => value === watch('password'),
+                  required: true,
+                })}
+                placeholder="Confirm password"
+              />
+              <div className="text-sm text-red-300">
+                {errors &&
+                errors['confirmPassword'] &&
+                errors['confirmPassword']['type'] === 'validate'
+                  ? 'Does not match password'
+                  : ''}
+              </div>
             </div>
           </div>
           <div className="md:flex md:items-center">
             <div className="md:w-1/3" />
             <div className="md:w-2/3">
               <button className="btn btn-primary inline-block" type="submit">
-                {isLoggingIn ? (
+                {isSigningUp ? (
                   <Loader type="ThreeDots" color="#ffffff" width={20} height={20} />
                 ) : (
-                  'Login'
+                  'Sign up'
                 )}
               </button>{' '}
-              or <Link to="/signup">Sign up</Link>
+              or <Link to="/login">Login</Link>
             </div>
           </div>
         </form>
@@ -111,4 +119,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default SignUp;
