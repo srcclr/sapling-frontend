@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { IMyState } from '../store/IStoreState';
 import produce from 'immer';
 import { Actions } from 'actions/actionTypes';
+import { asyncActionReducer } from 'utils/Helpers';
 
 const initialState = {
   email: '',
@@ -41,6 +42,10 @@ const myState = (state: IMyState = initialState, action: Actions) =>
         draft.id = id;
         draft.fetchResolved = true;
         draft.isFetchingMe = false;
+        return;
+      }
+      case 'FETCH_ME': {
+        asyncActionReducer(draft, action, ['isFetchingMe']);
         return;
       }
       default:
