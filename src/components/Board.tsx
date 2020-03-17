@@ -9,6 +9,7 @@ import { ChevronLeft } from 'react-feather';
 
 import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
+import { BoundActionsObjectMap } from 'actions/actionTypes';
 
 import IStoreState, { IBoardState, IEpicsListState } from 'store/IStoreState';
 import { SquareSpinner } from 'styles/ThemeComponents';
@@ -19,8 +20,7 @@ import Story from 'components/Story';
 import DependencyModeModal from 'components/DependencyModeModal';
 import CreateEpicZoneForm from 'components/CreateEpicZoneForm';
 import CreateStoryZoneForm from 'components/CreateStoryZoneForm';
-import { countsPhrase, startCSVDownload } from 'utils/Helpers';
-import { string } from 'prop-types';
+import { countsPhrase, startCSVDownload, getStoriesCountMap, hasStories } from 'utils/Helpers';
 
 interface StateSelector {
   boardState?: IBoardState;
@@ -35,7 +35,10 @@ function Board() {
     })) || {};
   const { boardState, epicsListState } = state;
   const dispatch = useDispatch();
-  const actions = bindActionCreators({ ...boardActions, ...epicsActions }, dispatch);
+  const actions = bindActionCreators<{}, BoundActionsObjectMap>(
+    { ...boardActions, ...epicsActions },
+    dispatch
+  );
   const { boardId } = useParams();
 
   useEffect(() => {
@@ -63,6 +66,8 @@ function Board() {
     storyAsyncCallStateById = {},
   } = boardState;
   const { name, id, sprints = [], unassigned = [] } = board;
+  const storiesCountMap = getStoriesCountMap(sprints, unassigned);
+  const hasStoriesAndSprints = hasStories(storiesCountMap) && sprints && sprints.length > 0;
 
   const handleSubmit = (sprintName, capacity) => {
     actions.createSprint(id, sprintName, capacity);
@@ -243,10 +248,18 @@ function Board() {
               <div className="w-full flex flex-row">
                 <div className="w-3/4 p-4 h-screen overflow-scroll p-10 bg-gray-100 ">
                   <div className="flex justify-end">
-                    <button className="btn btn-primary mr-2" onClick={handleExportCsv}>
+                    <button
+                      className="btn btn-primary mr-2"
+                      onClick={handleExportCsv}
+                      disabled={!hasStoriesAndSprints}
+                    >
                       Export CSV
                     </button>
-                    <button className="btn btn-primary" onClick={handleSolve}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleSolve}
+                      disabled={!hasStoriesAndSprints}
+                    >
                       Auto Arrange
                     </button>
                   </div>

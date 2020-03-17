@@ -168,3 +168,22 @@ export const getNumberValue = maybeANumber => {
     return undefined;
   }
 };
+
+export const getStoriesCountMap = (sprints = [], unassigned = []) => {
+  let storiesCountMap = {};
+
+  sprints.forEach(sprint => (storiesCountMap[sprint.id] = sprint.tickets.length));
+  storiesCountMap['backlog'] = unassigned.length;
+
+  return storiesCountMap;
+};
+
+export const hasStories = storiesCountMap => {
+  if (!storiesCountMap) {
+    return false;
+  }
+
+  return (
+    storiesCountMap['backlog'] > 0 || Object.keys(storiesCountMap).find(k => storiesCountMap[k] > 0)
+  );
+};
