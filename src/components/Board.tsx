@@ -327,7 +327,11 @@ function Board() {
                                   </div>
                                   <div className="mr-2">
                                     <div className="inline-block mr-1">Load left</div>
-                                    <div className="rounded-md bg-gray-100 inline-block center px-2">
+                                    <div
+                                      className={`rounded-md bg-gray-100 inline-block center px-2 ${
+                                        capacity - load < 0 ? 'text-red-400' : ''
+                                      }`}
+                                    >
                                       {capacity - load}
                                     </div>
                                   </div>

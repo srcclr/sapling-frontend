@@ -219,7 +219,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
 
           <div className="flex flex-col justify-center px-1 flex-grow-0">
             <div>
-              <div className="tag rounded-lg">{id}</div>
+              <div className="tag rounded-lg text-center">{id}</div>
             </div>
             <div className=" h-6 w-6 flex flex-row items-center justify-center">
               {isLoading ? (
