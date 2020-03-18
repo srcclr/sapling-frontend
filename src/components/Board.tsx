@@ -303,6 +303,7 @@ function Board() {
                           const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
                           const { isLoading: isSprintLoading = false } = sprintCallState;
                           const load = loadMap[sprintId];
+                          const loadLeft = capacity - load;
                           return (
                             <Sprint
                               key={i}
@@ -326,13 +327,17 @@ function Board() {
                                     </div>
                                   </div>
                                   <div className="mr-2">
-                                    <div className="inline-block mr-1">Load left</div>
+                                    {loadLeft >= 0 && (
+                                      <div className="inline-block mr-1">Load left</div>
+                                    )}
                                     <div
                                       className={`rounded-md bg-gray-100 inline-block center px-2 ${
-                                        capacity - load < 0 ? 'text-red-400' : ''
+                                        loadLeft < 0 ? 'text-red-400' : ''
                                       }`}
                                     >
-                                      {capacity - load}
+                                      {loadLeft >= 0
+                                        ? loadLeft
+                                        : `Load exceeds by ${Math.abs(loadLeft)}`}
                                     </div>
                                   </div>
                                 </div>
