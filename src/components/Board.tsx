@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { ChevronLeft } from 'react-feather';
+import config from 'utils/config';
+import moment from 'moment';
 
 import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
@@ -40,6 +42,9 @@ function Board() {
       boardState: state.boardState,
       epicsListState: state.epicsListState,
     })) || {};
+
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
   const { boardState, epicsListState } = state;
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, BoundActionsObjectMap>(
@@ -49,13 +54,20 @@ function Board() {
   const { boardId } = useParams();
 
   useEffect(() => {
-    refreshBoard();
     refreshEpicsList();
+    refreshBoard();
+    const interval = setInterval(() => {
+      refreshBoard();
+      setLastRefresh(Date.now());
+    }, config.BOARD_REFRESH_RATE_MS || 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const refreshBoard = () => {
     if (!isNaN(parseInt(boardId))) {
-      actions.fetchBoard(parseInt(boardId));
+      actions.fetchBoard(parseInt(boardId)).then(() => {
+        setIsInitialLoad(false);
+      });
     }
   };
 
@@ -208,7 +220,7 @@ function Board() {
   return (
     <div className="w-full flex flex-col h-full">
       <div className="flex-grow overflow-y-auto">
-        {isFetching ? (
+        {isFetching && isInitialLoad ? (
           <div className="flex items-stretch h-screen border-4 ">
             <div className="mx-auto w-1/12 self-center pb-16">
               <SquareSpinner className="mt-20" />
@@ -255,21 +267,26 @@ function Board() {
               </div>
               <div className="w-full flex flex-row">
                 <div className="w-3/4 p-4 h-screen overflow-scroll p-10 bg-gray-100 ">
-                  <div className="flex justify-end">
-                    <button
-                      className="btn btn-primary mr-2"
-                      onClick={handleExportCsv}
-                      disabled={!hasStoriesAndSprints}
-                    >
-                      Export CSV
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleSolve}
-                      disabled={!hasStoriesAndSprints}
-                    >
-                      Auto Arrange
-                    </button>
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="mr-2 text-sm text-gray-600">
+                      Last refresh {moment(lastRefresh).fromNow(false)}
+                    </div>
+                    <div className="flex flex-row">
+                      <button
+                        className="btn btn-primary mr-2"
+                        onClick={handleExportCsv}
+                        disabled={!hasStoriesAndSprints}
+                      >
+                        Export CSV
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleSolve}
+                        disabled={!hasStoriesAndSprints}
+                      >
+                        Auto Arrange
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex flex-row items-center mb-3">
