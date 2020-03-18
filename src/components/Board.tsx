@@ -57,6 +57,7 @@ function Board() {
     refreshEpicsList();
     refreshBoard();
     const interval = setInterval(() => {
+      refreshEpicsList();
       refreshBoard();
       setLastRefresh(Date.now());
     }, config.BOARD_REFRESH_RATE_MS || 5000);
