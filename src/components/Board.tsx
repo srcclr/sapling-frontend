@@ -8,6 +8,7 @@ import { bindActionCreators } from 'redux';
 import { ChevronLeft } from 'react-feather';
 import config from 'utils/config';
 import moment from 'moment';
+import Loader from 'react-loader-spinner';
 
 import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
@@ -82,6 +83,7 @@ function Board() {
     data: board = {},
     isFetching,
     isSolving,
+    isUploadingCsv,
     sprintAsyncCallStateById = {},
     storyAsyncCallStateById = {},
   } = boardState;
@@ -232,6 +234,8 @@ function Board() {
       .uploadCsv(id, file)
       .then(res => {
         toast.success('CSV uploaded successfully');
+        refreshEpicsList();
+        refreshBoard();
       })
       .catch(() => {
         toast.error('Error uploading CSV');
@@ -240,7 +244,7 @@ function Board() {
 
   return (
     <div className="w-full flex flex-col h-full">
-      <div className="flex-grow overflow-y-auto">
+      <div className={`flex-grow overflow-y-auto ${isUploadingCsv ? 'opacity-75' : ''}`}>
         {isFetching && isInitialLoad ? (
           <div className="flex items-stretch h-screen border-4 ">
             <div className="mx-auto w-1/12 self-center pb-16">
@@ -250,22 +254,26 @@ function Board() {
         ) : (
           <div>
             <div className="flex flex-row">
-              <div className="lg:w-1/5 md:w-1 sm:w-1 pl-4 p-4">
-                <div className="w-full mb-4 flex flex-row items-center">
-                  <Link to="/boards" className="mb-4 flex flex-row items-center">
-                    <ChevronLeft size="14" /> Boards
-                  </Link>
+              <div className="flex flex-col lg:w-1/5 md:w-1 sm:w-1 pl-4 p-4 h-screen">
+                <div className="flex-grow-0">
+                  <div className="w-full mb-4 flex flex-row items-center">
+                    <Link to="/boards" className="mb-2 flex flex-row items-center">
+                      <ChevronLeft size="14" /> Boards
+                    </Link>
+                  </div>
+                  <div className="w-full mb-4 text-2xl font-bold flex-shrink-0">{name}</div>
+                  <div className="flex-grow-0">
+                    <div className="text-xl mb-3">
+                      Epics <span className="text-sm p-2">{countsPhrase('epic', epics)}</span>
+                    </div>
+                    <div className="mb-4">
+                      <CreateEpicZoneForm onSubmit={handleCreateEpic} />
+                    </div>
+                  </div>
                 </div>
-                <div className="w-full mb-4 text-2xl font-bold flex-shrink-0">{name}</div>
 
-                <div className="flex-grow">
-                  <div className="text-xl mb-3">
-                    Epics <span className="text-sm p-2">{countsPhrase('epic', epics)}</span>
-                  </div>
-                  <div className="mb-4">
-                    <CreateEpicZoneForm onSubmit={handleCreateEpic} />
-                  </div>
-                  <div className="">
+                <div className="flex-grow flex flex-col overflow-scroll">
+                  <div className="flex-grow">
                     {epics && epics.length > 0 ? (
                       epics.map((epic, i) => {
                         const { id: epicId } = epic;
@@ -287,8 +295,8 @@ function Board() {
                 </div>
               </div>
               <div className="w-full flex flex-row">
-                <div className="w-3/4 p-4 h-screen overflow-scroll p-10 bg-gray-100 ">
-                  <div className="flex justify-between items-center mb-4">
+                <div className="w-3/4 p-4 h-screen flex flex-col bg-gray-100">
+                  <div className="flex flex-grow-0 justify-between items-center mb-4 px-10">
                     <div className="mr-2 text-sm text-gray-600">
                       Last refreshed {moment(lastRefresh).fromNow(false)}
                     </div>
@@ -306,7 +314,11 @@ function Board() {
                         className="btn btn-primary mr-2"
                         onClick={handleUploadClick}
                       >
-                        Upload CSV
+                        {isUploadingCsv ? (
+                          <Loader type="ThreeDots" color="#ffffff" width={20} height={20} />
+                        ) : (
+                          'Upload CSV'
+                        )}
                       </button>{' '}
                       <button
                         className="btn btn-primary mr-2"
@@ -324,103 +336,104 @@ function Board() {
                       </button>
                     </div>
                   </div>
-
-                  <div className="flex flex-row items-center mb-3">
-                    <div className="text-xl">Sprints</div>
-                    <span className="text-sm p-2">{countsPhrase('sprint', sprints)}</span>
-                  </div>
-                  {isSolving ? (
-                    <SquareSpinner className="mt-20" />
-                  ) : (
-                    <div>
-                      {sprints && sprints.length > 0 ? (
-                        sprints.map((sprint, i) => {
-                          const { id: sprintId, tickets, capacity } = sprint;
-                          const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
-                          const { isLoading: isSprintLoading = false } = sprintCallState;
-                          const load = loadMap[sprintId];
-                          const loadLeft = capacity - load;
-                          return (
-                            <Sprint
-                              key={i}
-                              {...sprint}
-                              onDelete={handleDeleteSprint}
-                              onEdit={handleEditSprint}
-                              isLoading={isSprintLoading}
-                            >
-                              <div className="flex flex-row justify-end mt-2 mb-2 text-sm ">
-                                <div className="flex flex-row bg-gray-200 p-1 rounded-md">
-                                  <div className="mr-2">
-                                    <div className="inline-block mr-1">Stories</div>
-                                    <div className="rounded-md bg-gray-100 inline-block center px-2">
-                                      {storiesCountMap[sprintId]}
+                  <div className="flex-grow overflow-scroll px-10 pb-16">
+                    <div className="flex flex-row items-center mb-3">
+                      <div className="text-xl">Sprints</div>
+                      <span className="text-sm p-2">{countsPhrase('sprint', sprints)}</span>
+                    </div>
+                    {isSolving || isUploadingCsv ? (
+                      <SquareSpinner className="mt-20" />
+                    ) : (
+                      <div>
+                        {sprints && sprints.length > 0 ? (
+                          sprints.map((sprint, i) => {
+                            const { id: sprintId, tickets, capacity } = sprint;
+                            const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
+                            const { isLoading: isSprintLoading = false } = sprintCallState;
+                            const load = loadMap[sprintId];
+                            const loadLeft = capacity - load;
+                            return (
+                              <Sprint
+                                key={i}
+                                {...sprint}
+                                onDelete={handleDeleteSprint}
+                                onEdit={handleEditSprint}
+                                isLoading={isSprintLoading}
+                              >
+                                <div className="flex flex-row justify-end mt-2 mb-2 text-sm ">
+                                  <div className="flex flex-row bg-gray-200 p-1 rounded-md">
+                                    <div className="mr-2">
+                                      <div className="inline-block mr-1">Stories</div>
+                                      <div className="rounded-md bg-gray-100 inline-block center px-2">
+                                        {storiesCountMap[sprintId]}
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="mr-2">
-                                    <div className="inline-block mr-1">Current load</div>
-                                    <div className="rounded-md bg-gray-100 inline-block center px-2">
-                                      {load}
+                                    <div className="mr-2">
+                                      <div className="inline-block mr-1">Current load</div>
+                                      <div className="rounded-md bg-gray-100 inline-block center px-2">
+                                        {load}
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="mr-2">
-                                    {loadLeft >= 0 && (
-                                      <div className="inline-block mr-1">Load left</div>
-                                    )}
-                                    <div
-                                      className={`rounded-md bg-gray-100 inline-block center px-2 ${
-                                        loadLeft < 0 ? 'text-red-400' : ''
-                                      }`}
-                                    >
-                                      {loadLeft >= 0
-                                        ? loadLeft
-                                        : `Load exceeds by ${Math.abs(loadLeft)}`}
+                                    <div className="mr-2">
+                                      {loadLeft >= 0 && (
+                                        <div className="inline-block mr-1">Load left</div>
+                                      )}
+                                      <div
+                                        className={`rounded-md bg-gray-100 inline-block center px-2 ${
+                                          loadLeft < 0 ? 'text-red-400' : ''
+                                        }`}
+                                      >
+                                        {loadLeft >= 0
+                                          ? loadLeft
+                                          : `Load exceeds by ${Math.abs(loadLeft)}`}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div className="flex flex-wrap mx-auto">
-                                {tickets && tickets.length > 0 ? (
-                                  tickets.map((story, i) => {
-                                    const { id } = story;
-                                    const { [id]: storyCallState = {} } = storyAsyncCallStateById;
-                                    const { isLoading: isStoryLoading = false } = storyCallState;
-                                    const { id: storyId } = activeStory;
-                                    return (
-                                      <Story
-                                        key={i}
-                                        {...story}
-                                        onDelete={id => handleDeleteStory(id, sprintId)}
-                                        onEdit={delayedHandleEditStory}
-                                        isLoading={isStoryLoading}
-                                        epics={epics}
-                                        sprints={sprints}
-                                        onAddingDependency={handleAddingDependency}
-                                        dependencyMode={dependencyMode}
-                                        isAddingDependency={id === storyId}
-                                        onAddAsDependency={handleAddAsDependency}
-                                        onDeleteDependency={handleDeleteDependency}
-                                      />
-                                    );
-                                  })
-                                ) : (
-                                  <div className="italic text-gray-500">
-                                    No stories found in this sprint
-                                  </div>
-                                )}
-                              </div>
-                            </Sprint>
-                          );
-                        })
-                      ) : (
-                        <div className="italic text-gray-500">No Sprints found</div>
-                      )}
-                      <div className="mt-4">
-                        <CreateSprintZoneForm onSubmit={handleCreateSprint} />
+                                <div className="flex flex-wrap mx-auto">
+                                  {tickets && tickets.length > 0 ? (
+                                    tickets.map((story, i) => {
+                                      const { id } = story;
+                                      const { [id]: storyCallState = {} } = storyAsyncCallStateById;
+                                      const { isLoading: isStoryLoading = false } = storyCallState;
+                                      const { id: storyId } = activeStory;
+                                      return (
+                                        <Story
+                                          key={i}
+                                          {...story}
+                                          onDelete={id => handleDeleteStory(id, sprintId)}
+                                          onEdit={delayedHandleEditStory}
+                                          isLoading={isStoryLoading}
+                                          epics={epics}
+                                          sprints={sprints}
+                                          onAddingDependency={handleAddingDependency}
+                                          dependencyMode={dependencyMode}
+                                          isAddingDependency={id === storyId}
+                                          onAddAsDependency={handleAddAsDependency}
+                                          onDeleteDependency={handleDeleteDependency}
+                                        />
+                                      );
+                                    })
+                                  ) : (
+                                    <div className="italic text-gray-500">
+                                      No stories found in this sprint
+                                    </div>
+                                  )}
+                                </div>
+                              </Sprint>
+                            );
+                          })
+                        ) : (
+                          <div className="italic text-gray-500">No Sprints found</div>
+                        )}
+                        <div className="mt-4">
+                          <CreateSprintZoneForm onSubmit={handleCreateSprint} />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-                <div className="lg:w-1/4 md:w-1 sm:w-1 h-screen overflow-scroll p-10 bg-gray-200 flex-grow ">
+                <div className="lg:w-1/4 md:w-1 sm:w-1 h-screen overflow-scroll px-10 pt-4 bg-gray-200 flex-grow ">
                   <div className=" flex flex-row items-center mb-3">
                     <div className="text-xl">Backlog</div>
                     <span className="text-sm p-2">{countsPhrase('story', unassigned)}</span>

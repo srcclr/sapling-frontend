@@ -14,6 +14,7 @@ const initialState = {
   isDeletingDependency: false,
   isExportingCsv: false,
   isCreatingSprint: false,
+  isUploadingCsv: false,
   sprintAsyncCallStateById: {
     // Tracks isLoading, isSuccess, isFailure status by sprint id
     // for example, 4: { isSuccess: false, isLoading: true, isFailure: false}
@@ -139,6 +140,10 @@ const boardListState = (state: IBoardState = initialState, action: Actions) =>
             }
           }
         });
+        return;
+      }
+      case 'UPLOAD_CSV': {
+        asyncActionReducer(draft, action, ['isUploadingCsv']);
         return;
       }
       default:

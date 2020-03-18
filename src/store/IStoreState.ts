@@ -39,6 +39,7 @@ export interface IBoardState {
   isDeletingDependency?: boolean;
   isCreatingSprint?: boolean;
   isExportingCsv?: boolean;
+  isUploadingCsv?: boolean;
   dependant?: number;
   shownDependencies?: number[];
   errorMessage?: string;
