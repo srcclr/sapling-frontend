@@ -1,8 +1,9 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import _ from 'lodash';
-import { ISprint } from 'types';
 import { Trash } from 'react-feather';
 import Loader from 'react-loader-spinner';
+
+import { ISprint } from 'types';
 
 interface ISprintProps {
   onDelete: (sprintId: number) => void;
@@ -37,7 +38,13 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
         <div>
           <div className="tag mr-2">{id}</div>
         </div>
-        <form onSubmit={handleSubmit} onChange={handleSubmit} className="flex-grow">
+
+        <form
+          onSubmit={handleSubmit}
+          onChange={handleSubmit}
+          className="flex-grow"
+          key={`${id}${name}${capacity}${goal}`}
+        >
           <div className="flex flex-row mb-2">
             <input
               className=" placeholder-gray-500 mr-2 minimal text-lg font-bold"
