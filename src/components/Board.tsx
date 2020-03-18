@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, createRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import _ from 'lodash';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router';
@@ -218,6 +218,26 @@ function Board() {
     epicAsyncCallStateById = {},
   } = epicsListState;
 
+  const uploadInputRef = useRef();
+
+  const handleUploadClick = () => {
+    if (uploadInputRef) {
+      uploadInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = () => {
+    const file = uploadInputRef.current.files[0];
+    actions
+      .uploadCsv(id, file)
+      .then(res => {
+        toast.success('CSV uploaded successfully');
+      })
+      .catch(() => {
+        toast.error('Error uploading CSV');
+      });
+  };
+
   return (
     <div className="w-full flex flex-col h-full">
       <div className="flex-grow overflow-y-auto">
@@ -273,6 +293,21 @@ function Board() {
                       Last refreshed {moment(lastRefresh).fromNow(false)}
                     </div>
                     <div className="flex flex-row">
+                      <input
+                        type="file"
+                        id="file"
+                        className="hidden"
+                        ref={uploadInputRef}
+                        onChange={handleFileChange}
+                      />
+                      <button
+                        name="button"
+                        value="Upload"
+                        className="btn btn-primary mr-2"
+                        onClick={handleUploadClick}
+                      >
+                        Upload CSV
+                      </button>{' '}
                       <button
                         className="btn btn-primary mr-2"
                         onClick={handleExportCsv}

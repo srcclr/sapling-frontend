@@ -148,3 +148,18 @@ export function exportCsv(boardId: number) {
     payload: { request: { data: { boardId } } },
   } as const;
 }
+
+export function uploadCsv(boardId: number, file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return {
+    type: 'UPLOAD_CSV',
+    callApi: () =>
+      ApiService.post(`/board/${boardId}/csv`, {
+        data: formData,
+        headers: { type: '' },
+      }),
+    payload: { request: { data: { boardId } } },
+  } as const;
+}

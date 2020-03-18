@@ -48,7 +48,7 @@ class ApiService implements IApiService {
             const request = superagent[method](formatUrl(path));
             const token = AuthService.getAuthToken();
             const tokenHeader = 'Authorization';
-            const { type: requestType = '' } = headers;
+            const { type: requestType } = headers;
             headers = {
               Accept: 'application/json',
               ...headers,
@@ -76,7 +76,7 @@ class ApiService implements IApiService {
               headers[tokenHeader] = `Bearer ${theToken}`;
             }
 
-            if (!requestType) {
+            if (requestType === 'undefined') {
               request.type('application/json');
             }
 
