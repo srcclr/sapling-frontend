@@ -20,7 +20,14 @@ import Story from 'components/Story';
 import DependencyModeModal from 'components/DependencyModeModal';
 import CreateEpicZoneForm from 'components/CreateEpicZoneForm';
 import CreateStoryZoneForm from 'components/CreateStoryZoneForm';
-import { countsPhrase, startCSVDownload, getStoriesCountMap, hasStories } from 'utils/Helpers';
+import {
+  countsPhrase,
+  startCSVDownload,
+  getStoriesCountMap,
+  hasStories,
+  getLoadMap,
+} from 'utils/Helpers';
+import { ISprint } from 'types';
 
 interface StateSelector {
   boardState?: IBoardState;
@@ -68,9 +75,10 @@ function Board() {
   const { name, id, sprints = [], unassigned = [] } = board;
   const storiesCountMap = getStoriesCountMap(sprints, unassigned);
   const hasStoriesAndSprints = hasStories(storiesCountMap) && sprints && sprints.length > 0;
+  const loadMap = getLoadMap(sprints, unassigned);
 
-  const handleSubmit = (sprintName, capacity) => {
-    actions.createSprint(id, sprintName, capacity);
+  const handleCreateSprint = (sprint: ISprint) => {
+    actions.createSprint(id, sprint);
   };
 
   const handleDeleteSprint = sprintId => {
@@ -274,9 +282,10 @@ function Board() {
                     <div>
                       {sprints && sprints.length > 0 ? (
                         sprints.map((sprint, i) => {
-                          const { id: sprintId, tickets } = sprint;
+                          const { id: sprintId, tickets, capacity } = sprint;
                           const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
                           const { isLoading: isSprintLoading = false } = sprintCallState;
+                          const load = loadMap[sprintId];
                           return (
                             <Sprint
                               key={i}
@@ -285,6 +294,28 @@ function Board() {
                               onEdit={handleEditSprint}
                               isLoading={isSprintLoading}
                             >
+                              <div className="flex flex-row justify-end mt-2 mb-2 text-sm ">
+                                <div className="flex flex-row bg-gray-200 p-1 rounded-md">
+                                  <div className="mr-2">
+                                    <div className="inline-block mr-1">Stories</div>
+                                    <div className="rounded-md bg-gray-100 inline-block center px-2">
+                                      {storiesCountMap[sprintId]}
+                                    </div>
+                                  </div>
+                                  <div className="mr-2">
+                                    <div className="inline-block mr-1">Current load</div>
+                                    <div className="rounded-md bg-gray-100 inline-block center px-2">
+                                      {load}
+                                    </div>
+                                  </div>
+                                  <div className="mr-2">
+                                    <div className="inline-block mr-1">Load left</div>
+                                    <div className="rounded-md bg-gray-100 inline-block center px-2">
+                                      {capacity - load}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                               <div className="flex flex-wrap mx-auto">
                                 {tickets && tickets.length > 0 ? (
                                   tickets.map((story, i) => {
@@ -322,7 +353,7 @@ function Board() {
                         <div className="italic text-gray-500">No Sprints found</div>
                       )}
                       <div className="mt-4">
-                        <CreateSprintZoneForm onSubmit={handleSubmit} />
+                        <CreateSprintZoneForm onSubmit={handleCreateSprint} />
                       </div>
                     </div>
                   )}

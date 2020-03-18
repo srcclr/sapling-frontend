@@ -27,12 +27,13 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
     event.preventDefault();
     const sprintName = event.currentTarget.sprintName.value;
     const capacity = event.currentTarget.capacity.value || 0;
+    const goal = event.currentTarget.goal.value || 0;
     delayedEdit({ id, name: sprintName, capacity, goal } as ISprint);
   };
 
   return (
     <div className={` px-4 mb-4 pb-4 ${isLoading ? 'opacity-50' : ''}`}>
-      <div className="flex flex-row items-center mb-4">
+      <div className="flex flex-row items-center">
         <div>
           <div className="tag mr-2">{id}</div>
         </div>
@@ -53,7 +54,7 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
               placeholder="Capacity (eg. 10)"
             />
           </div>
-          {/* <div className="flex flex-row">
+          <div className="flex flex-row">
             <input
               className=" placeholder-gray-500 mr-2 minimal"
               type="text"
@@ -61,7 +62,7 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
               placeholder="Goal"
               defaultValue={goal}
             />
-          </div> */}
+          </div>
         </form>
         <div className="p-4 flex-grow-0">
           <div className=" h-8 w-8 flex flex-row items-center justify-center">

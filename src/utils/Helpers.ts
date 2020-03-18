@@ -1,6 +1,6 @@
 import FileSaver from 'file-saver';
 import { AsyncSubType } from 'actions/actionTypes';
-import { IError } from 'types';
+import { IError, ISprint, IStory } from 'types';
 import _ from 'lodash';
 
 export const startCSVDownload = (fileName, data) => {
@@ -169,13 +169,32 @@ export const getNumberValue = maybeANumber => {
   }
 };
 
-export const getStoriesCountMap = (sprints = [], unassigned = []) => {
+export const getStoriesCountMap = (sprints: ISprint[] = [], unassigned: IStory[] = []) => {
   let storiesCountMap = {};
 
   sprints.forEach(sprint => (storiesCountMap[sprint.id] = sprint.tickets.length));
   storiesCountMap['backlog'] = unassigned.length;
 
   return storiesCountMap;
+};
+
+export const getStoriesLoad = (stories: IStory[]) => {
+  if (!stories) {
+    return undefined;
+  }
+
+  return stories.reduce((acc, story) => {
+    const { weight } = story;
+    return acc + weight;
+  }, 0);
+};
+
+export const getLoadMap = (sprints: ISprint[] = [], unassigned: IStory[] = []) => {
+  let loadMap = {};
+  sprints.forEach(sprint => (loadMap[sprint.id] = getStoriesLoad(sprint.tickets)));
+  loadMap['backlog'] = getStoriesLoad(unassigned);
+
+  return loadMap;
 };
 
 export const hasStories = storiesCountMap => {

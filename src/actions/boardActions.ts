@@ -21,10 +21,12 @@ export function deleteBoard(boardId: number) {
   } as const;
 }
 
-export function createSprint(boardId: number, sprintName: string, capacity: number) {
+export function createSprint(boardId: number, sprint: ISprint) {
+  const { name, capacity, goal } = sprint;
   const data = {
-    name: sprintName,
-    capacity: capacity,
+    name,
+    capacity,
+    goal,
   };
 
   return {
@@ -40,6 +42,7 @@ export function updateSprint(sprint: ISprint) {
   const data = {
     name,
     capacity,
+    goal,
   };
 
   return {
