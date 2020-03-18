@@ -304,7 +304,7 @@ function Board() {
               </div>
               <div className="w-full flex flex-row">
                 <div className="w-3/4 p-4 h-screen flex flex-col bg-gray-100">
-                  <div className="flex flex-grow-0 justify-between items-center mb-4 px-10">
+                  <div className="flex flex-grow-0 justify-between items-center mb-4 px-10 py-2">
                     <div className="mr-2 text-sm text-gray-600">
                       Last refreshed {moment(lastRefresh).fromNow(false)}
                     </div>
