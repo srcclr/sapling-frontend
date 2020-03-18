@@ -269,7 +269,7 @@ function Board() {
                 <div className="w-3/4 p-4 h-screen overflow-scroll p-10 bg-gray-100 ">
                   <div className="flex justify-between items-center mb-4">
                     <div className="mr-2 text-sm text-gray-600">
-                      Last refresh {moment(lastRefresh).fromNow(false)}
+                      Last refreshed {moment(lastRefresh).fromNow(false)}
                     </div>
                     <div className="flex flex-row">
                       <button
