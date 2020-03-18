@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect, useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import AuthService from 'utils/AuthService';
 import { bindActionCreators } from 'redux';
 import { Link } from 'react-router-dom';
@@ -36,7 +36,7 @@ function Login() {
     });
   };
 
-  const { isFetchingToken, query = {}, error = {}, isLoggingIn } = loginState;
+  const { error = {}, isLoggingIn } = loginState;
   const errorMessage = getLoginErrorMessage(error);
 
   return (
