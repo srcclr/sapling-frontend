@@ -5,7 +5,7 @@ import { Trash } from 'react-feather';
 import Loader from 'react-loader-spinner';
 
 interface IEpicProps {
-  onDelete: (epicId: number) => void;
+  onDelete: (epic: IEpic) => void;
   isLoading: boolean;
 }
 
@@ -28,7 +28,11 @@ const Epic: React.FunctionComponent<IEpic & IEpicProps> = ({
             {isLoading ? (
               <Loader type="Grid" width={13} height={13} />
             ) : (
-              <Trash size="16" className="clickable" onClick={() => onDelete(id)} />
+              <Trash
+                size="16"
+                className="clickable"
+                onClick={() => onDelete({ id, name, priority })}
+              />
             )}
           </div>
         </div>

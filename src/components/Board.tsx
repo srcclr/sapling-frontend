@@ -15,7 +15,7 @@ import * as epicsActions from 'actions/epicsActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
 
 import IStoreState, { IBoardState, IEpicsListState } from 'store/IStoreState';
-import { SquareSpinner } from 'styles/ThemeComponents';
+import { SquareSpinner, Dialog } from 'styles/ThemeComponents';
 import CreateSprintZoneForm from 'components/CreateSprintZoneForm';
 import Sprint from 'components/Sprint';
 import Epic from 'components/Epic';
@@ -30,7 +30,7 @@ import {
   hasStories,
   getLoadMap,
 } from 'utils/Helpers';
-import { ISprint } from 'types';
+import { ISprint, IEpic } from 'types';
 
 interface StateSelector {
   boardState?: IBoardState;
@@ -104,17 +104,6 @@ function Board() {
       })
       .catch(() => {
         toast.error('Error deleting sprint');
-      });
-  };
-
-  const handleDeleteEpic = epicId => {
-    actions
-      .deleteEpic(epicId)
-      .then(() => {
-        toast.success('Epic successfully deleted');
-      })
-      .catch(() => {
-        toast.error('Error deleting epic');
       });
   };
 
@@ -239,6 +228,25 @@ function Board() {
       })
       .catch(() => {
         toast.error('Error uploading CSV');
+      });
+  };
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [epicToDelete, setEpicToDelete] = useState<IEpic>({});
+  const handleDeleteEpic = (epic: IEpic) => {
+    setIsDeleteDialogOpen(true);
+    setEpicToDelete(epic);
+  };
+
+  const handleConfirmEpicDelete = () => {
+    const { id: epicId } = epicToDelete;
+    actions
+      .deleteEpic(epicId)
+      .then(() => {
+        toast.success('Epic successfully deleted');
+      })
+      .catch(() => {
+        toast.error('Error deleting epic');
       });
   };
 
@@ -487,6 +495,25 @@ function Board() {
       </div>
       {dependencyMode && <DependencyModeModal story={activeStory} onCancel={exitDependencyMode} />}
       {dependencyMode}
+
+      <Dialog
+        open={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleConfirmEpicDelete}
+        closeOnOutsideClick={true}
+        className="w-1/3"
+        intent="danger"
+      >
+        <div className="mb-3">
+          You are deleting epic:{' '}
+          <div className="flex row">
+            <span className="tag">{epicToDelete.id}</span>
+            <div className="text-lg">{epicToDelete.name}</div>
+          </div>
+        </div>
+
+        <div>Are you sure you want to delete?</div>
+      </Dialog>
     </div>
   );
 }
