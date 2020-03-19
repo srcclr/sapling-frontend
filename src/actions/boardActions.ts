@@ -2,6 +2,7 @@ import { ILoginParams } from '../types';
 import ApiService from 'utils/ApiService';
 import config from 'utils/config';
 import { ISprint, IStory, IBoard } from 'types';
+import { getNumberValue } from 'utils/Helpers';
 
 export function fetchBoard(boardId: number) {
   const endpoint = `${config.API_URL}/login`;
@@ -78,7 +79,12 @@ export function createStory(boardId: number, epicId: number, description: string
  * indicate changes that may be required in the backend.
  */
 export function updateStory(boardId: number, story: IStory) {
-  const { pin, id, epic: epicId } = story;
+  const { pin, id, epic: epicId, weight } = story;
+  const data = {
+    ...story,
+    epic: getNumberValue(epicId),
+    weight: getNumberValue(weight),
+  };
   let changePin = () =>
     pin
       ? ApiService.post(`/board/${boardId}/pins`, { data: { ticketId: id, sprintId: pin } })
@@ -88,12 +94,14 @@ export function updateStory(boardId: number, story: IStory) {
     type: 'UPDATE_STORY',
     callApi: () =>
       Promise.all([
-        ApiService.put(`/ticket/${id}`, { data: story }),
+        ApiService.put(`/ticket/${id}`, {
+          data,
+        }),
         ApiService.put(`/epic/${epicId}/ticket/${id}`),
         changePin(),
       ]),
     payload: {
-      request: { data: { story } },
+      request: { data: { story: data } },
       success: { data: {} as IStory },
     },
   } as const;
