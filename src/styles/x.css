@@ -144,11 +144,11 @@ textarea {
   @apply mb-4 mr-4 h-32 max-w-sm w-64 relative overflow-hidden;
 }
 
-.story:hover {
+.story.active {
   @apply overflow-visible;
 }
 
-.story:hover .inner {
+.story .inner.active {
   @apply z-10 h-64 rounded-sm;
 }
 

@@ -39,12 +39,12 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   sprints,
   dependencyMode,
 }) => {
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   // For detecting outside clicks
   const ref = useRef();
   useOnClickOutside(ref, () => {
-    setIsEditMode(false);
+    setIsActive(false);
   });
 
   const pinValue = getNumberValue(pin);
@@ -64,11 +64,6 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
 
   const handleAddAsDependency = () => {
     onAddAsDependency(id);
-  };
-
-  const handleDelete = () => {
-    onDelete(id);
-    toggleEditMode();
   };
 
   const activeEpic = epics && epics.find(e => e.id === epicValue);
@@ -92,13 +87,18 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     defaultValues,
   });
 
-  const toggleEditMode = () => {
+  const handleDelete = () => {
+    onDelete(id);
     reset(defaultValues);
-    setIsEditMode(!isEditMode);
+  };
+
+  const toggleActive = () => {
+    setIsActive(!isActive);
+    reset(defaultValues);
   };
 
   return (
-    <div className={`story overflow-hidden `} ref={ref}>
+    <div className={`story ${!isActive ? 'cursor-pointer' : 'active'}`} ref={ref}>
       {isDependencyCandidate ? (
         <DependencyCandidateView
           description={description}
@@ -109,20 +109,21 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
         />
       ) : (
         <div
-          className={`inner flex flex-row items-start justify-between shadow-lg overflow-scroll ${
+          className={`inner flex overflow-hidden flex-row items-start justify-between shadow-lg ${
             isAddingDependency ? 'border-2 border-teal-200' : ''
-          }`}
+          } ${isActive ? 'active' : ''}`}
+          onClick={() => setIsActive(true)}
         >
           <div>
-            {!isEditMode ? (
-              <div className="flex-grow cursor-pointer">
+            {!isActive ? (
+              <div className="flex-grow ">
                 <DetailsView
                   description={defaultValues.description}
                   id={id}
                   weight={defaultValues.weight}
                   epicName={defaultValues.epicName}
                   sprintName={defaultValues.sprintName}
-                  onClick={toggleEditMode}
+                  onClick={toggleActive}
                 />
               </div>
             ) : (

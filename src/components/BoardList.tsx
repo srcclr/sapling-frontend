@@ -106,17 +106,17 @@ function BoardList() {
         <SquareSpinner className="mt-20" />
       ) : boards.length > 0 ? (
         boards.map((board, i) => {
-          const { id, name } = board;
+          const { id, name } = board || {};
           return (
             <div key={i} className="flex row items-center">
               <Link to={`/boards/${id}`} className="text-2xl font-light leading-relaxed mr-2">
                 {name}
               </Link>{' '}
               <span className="tag">#{id}</span>
-              <div className="flex row">
-                <div className="mr-1">
+              <div className="flex row pl-2">
+                {/* <div className="mr-1">
                   <Edit2 size="16" className="clickable" />
-                </div>
+                </div> */}
                 <Trash size="16" className="clickable" onClick={() => handleDeleteBoard(board)} />
               </div>
             </div>
@@ -138,13 +138,13 @@ function BoardList() {
       >
         <div className="mb-3">
           You are deleting board:{' '}
-          <div className="flex row">
-            <span className="tag">{boardIdToDelete}</span>
+          <div className="flex flex-row items-center mt-4">
+            <span className="tag mr-2">{boardIdToDelete}</span>
             <div className="text-lg">{boardNameToDelete}</div>
           </div>
         </div>
 
-        <div>Are you sure you want to delete?</div>
+        <div>This will delete all stories under this board. Are you sure you want to delete?</div>
       </Dialog>
     </div>
   );
