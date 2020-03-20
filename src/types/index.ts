@@ -38,6 +38,16 @@ export interface IStory {
   pin?: number;
 }
 
+interface Dep {
+  name: string;
+  sprint?: number;
+}
+
+export interface ICrossDeps {
+  deps: { from: Dep, to: Dep }[];
+  maxSprint: number;
+}
+
 export interface IError {
   error?: {
     message?: string;

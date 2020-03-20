@@ -128,6 +128,10 @@ function BoardList() {
         </div>
       )}
 
+      <Link to={`/boards/dependencies`} className="text-2xl font-light leading-relaxed mr-2">
+        Dependencies
+      </Link>
+
       <Dialog
         open={isDeleteDialogOpen}
         onClose={handleCloseDeleteDialog}

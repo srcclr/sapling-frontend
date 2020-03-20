@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import boardState from './boardState';
 // import newBoardState from './newBoardState';
 import boardListState from './boardListState';
+import dependenciesViewState from './dependenciesViewState';
 import epicsListState from './epicsListState';
 import loginState from './loginState';
 import myState from './myState';
@@ -14,6 +15,7 @@ const rootReducer = history =>
     // newBoardState,
     boardState,
     boardListState,
+    dependenciesViewState,
     epicsListState,
     loginState,
     myState,
