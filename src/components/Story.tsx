@@ -6,6 +6,7 @@ import Loader from 'react-loader-spinner';
 import { useForm } from 'react-hook-form';
 import { useOnClickOutside } from 'hooks';
 import { getNumberValue } from 'utils/Helpers';
+import classnames from 'classnames';
 
 interface IStoryProps {
   onDelete: (epicId: number) => void;
@@ -59,7 +60,8 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   };
 
   const handleAddingDependency = () => {
-    onAddingDependency({ id, description, weight, epic: epicValue });
+    onAddingDependency({ id, description, weight, epic: epicValue, dependencies });
+    setIsActive(false);
   };
 
   const handleAddAsDependency = () => {
@@ -97,22 +99,27 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     reset(defaultValues);
   };
 
+  const storyClassNames = classnames({
+    active: isActive,
+    'border-2 border-teal-200': isAddingDependency,
+    'cursor-pointer hover:shadow-lg': isDependencyCandidate,
+  });
+
+  const detailsClassNames = classnames({
+    'active shadow-lg': isActive,
+    'cursor-pointer': !isActive,
+  });
+
   return (
-    <div className={`story ${!isActive ? 'cursor-pointer' : 'active'}`} ref={ref}>
-      {isDependencyCandidate ? (
-        <DependencyCandidateView
-          description={description}
-          id={id}
-          weight={weight}
-          epicName={epicName}
-          onClick={handleAddAsDependency}
-        />
-      ) : (
+    <div
+      className={`story ${storyClassNames}`}
+      ref={ref}
+      onClick={isDependencyCandidate ? handleAddAsDependency : null}
+    >
+      <div className={`flex flex-col details ${detailsClassNames}`}>
         <div
-          className={`inner flex overflow-hidden flex-row items-start justify-between shadow-lg ${
-            isAddingDependency ? 'border-2 border-teal-200' : ''
-          } ${isActive ? 'active' : ''}`}
-          onClick={() => setIsActive(true)}
+          className={`flex-grow p-4  flex overflow-hidden flex-row items-start justify-between  `}
+          onClick={!isDependencyCandidate ? () => setIsActive(true) : null}
         >
           <div>
             {!isActive ? (
@@ -191,31 +198,6 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                 </div>
               </form>
             )}
-
-            <div className="mt-1">
-              <div className="text-sm">Dependencies</div>
-              {dependencies && dependencies.length > 0 ? (
-                dependencies.map((dep, i) => {
-                  return (
-                    <div key={i} className="tag mr-1 inline-block ">
-                      <div className="flex flex-row items-center">
-                        {dep}{' '}
-                        <X
-                          size="16"
-                          className="clickable text-red-500"
-                          onClick={() => onDeleteDependency(id, dep)}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <span className="text-sm italic text-gray-400">No dependencies</span>
-              )}
-              <a className="cursor-pointer text-sm ml-1" onClick={handleAddingDependency}>
-                Add
-              </a>
-            </div>
           </div>
 
           <div className="flex flex-col justify-center px-1 flex-grow-0">
@@ -231,21 +213,29 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
-};
-
-const DependencyCandidateView = ({ id, description, weight, epicName, onClick }) => {
-  return (
-    <div className="inner-plain flex p-3 hover:shadow-lg cursor-pointer bg-white" onClick={onClick}>
-      <div className="flex-grow opacity-75">
-        <div className="text-sm font-semibold mb-1">{description} </div>
-        <div className="text-sm ">Story Points: {weight} </div>
-        <div className="text-sm ">Epic: {epicName} </div>
-      </div>
-      <div>
-        <div className="tag rounded-lg">{id}</div>
+        <div className="flex-grow-0 mt-1 px-4 py-2 bg-gray-200">
+          {dependencies && dependencies.length > 0 ? (
+            dependencies.map((dep, i) => {
+              return (
+                <div key={i} className="bg-gray-100 text-xs p-1 rounded-md mr-1 inline-block ">
+                  <div className="flex flex-row items-center">
+                    {dep}{' '}
+                    <X
+                      size="16"
+                      className="clickable text-red-500"
+                      onClick={() => onDeleteDependency(id, dep)}
+                    />
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <span className="text-sm italic text-gray-400">No dependencies</span>
+          )}
+          <a className="cursor-pointer text-sm ml-1" onClick={handleAddingDependency}>
+            Add
+          </a>
+        </div>
       </div>
     </div>
   );

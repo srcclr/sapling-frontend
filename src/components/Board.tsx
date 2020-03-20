@@ -157,7 +157,7 @@ function Board() {
   const [dependencyMode, setDependencyMode] = useState(false);
   const [activeStory, setActiveStory] = useState<{
     id?: number;
-    dependency?: string;
+    dependencies?: string;
     weight?: number;
   }>({});
 
@@ -178,16 +178,21 @@ function Board() {
   };
 
   const handleAddAsDependency = storyId => {
-    const { id: activeStoryId } = activeStory;
-    actions
-      .addDependency(id, activeStoryId, storyId)
-      .then(() => {
-        toast.success('Dependency added successfully');
-        exitDependencyMode();
-      })
-      .catch(() => {
-        toast.error('Error adding dependency');
-      });
+    const { id: activeStoryId, dependencies: existingDependencies = [] } = activeStory;
+
+    if (!existingDependencies.includes(storyId)) {
+      actions
+        .addDependency(id, activeStoryId, storyId)
+        .then(() => {
+          toast.success('Dependency added successfully');
+          exitDependencyMode();
+        })
+        .catch(() => {
+          toast.error('Error adding dependency');
+        });
+    } else {
+      toast.error('Dependency already exists');
+    }
   };
 
   const handleExportCsv = () => {
@@ -386,15 +391,19 @@ function Board() {
                                       {loadLeft >= 0 && (
                                         <div className="inline-block mr-1">Load left</div>
                                       )}
-                                      <div
-                                        className={`rounded-md bg-gray-100 inline-block center px-2 ${
-                                          loadLeft < 0 ? 'text-red-400' : ''
-                                        }`}
-                                      >
-                                        {loadLeft >= 0
-                                          ? loadLeft
-                                          : `Load exceeds by ${Math.abs(loadLeft)}`}
-                                      </div>
+                                      {!isNaN(loadLeft) ? (
+                                        <div
+                                          className={`rounded-md bg-gray-100 inline-block center px-2 ${
+                                            loadLeft < 0 ? 'text-red-400' : ''
+                                          }`}
+                                        >
+                                          {loadLeft >= 0
+                                            ? loadLeft
+                                            : `Load exceeds by ${Math.abs(loadLeft)}`}
+                                        </div>
+                                      ) : (
+                                        <div>-</div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>

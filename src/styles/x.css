@@ -141,24 +141,25 @@ textarea {
 }
 
 .story {
-  @apply mb-4 mr-4 h-32 max-w-sm w-64 relative overflow-hidden;
+  @apply mb-4 mr-4 h-48 max-w-sm w-64 relative overflow-hidden;
+  transition: box-shadow 0.2s ease;
 }
 
 .story.active {
   @apply overflow-visible;
 }
 
-.story .inner.active {
+.story .details.active {
   @apply z-10 h-64 rounded-sm;
 }
 
-.story .inner {
-  @apply absolute w-full bg-white p-4 h-32;
+.story .details {
+  @apply absolute w-full bg-white h-48;
   transition: height 0.2s ease;
 }
 
 .story .inner-plain {
-  @apply h-32;
+  @apply h-32 w-full bg-white h-32;
   transition: height 0.2s ease;
 }
 
