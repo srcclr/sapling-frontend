@@ -152,7 +152,7 @@ export function deleteDependency(boardId: number, fromStoryId: number, toStoryId
 export function exportCsv(boardId: number) {
   return {
     type: 'EXPORT_CSV',
-    callApi: () => ApiService.get(`/board/${boardId}/csv`, { headers: { Accept: 'text/csv' } }),
+    callApi: () => ApiService.get(`/board/${boardId}/csv/jira`, { headers: { Accept: 'text/csv' } }),
     payload: { request: { data: { boardId } } },
   } as const;
 }
@@ -164,7 +164,7 @@ export function uploadCsv(boardId: number, file) {
   return {
     type: 'UPLOAD_CSV',
     callApi: () =>
-      ApiService.post(`/board/${boardId}/csv`, {
+      ApiService.post(`/board/${boardId}/csv/jira`, {
         data: formData,
         headers: { type: '' },
       }),
