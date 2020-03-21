@@ -1,13 +1,20 @@
-import { IBoard, IEpic, IError } from '../types';
+import { IBoard, IEpic, IError, ICrossDeps } from '../types';
 import { FormStateMap } from 'redux-form';
 export default interface IStoreState {
   readonly form: FormStateMap;
   readonly epicsListState: IEpicsListState;
   readonly boardListState: IBoardListState;
+  readonly dependenciesViewState: IDependenciesViewState;
   readonly boardState: IBoardState;
   readonly newBoardState: IBoardState;
   readonly loginState: ILoginState;
   readonly myState: IMyState;
+}
+
+export interface IDependenciesViewState {
+  data?: ICrossDeps;
+  isFetching?: boolean;
+  errorMessage?: string;
 }
 
 export interface IBoardListState {
