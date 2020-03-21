@@ -1,4 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useContext,
+  createContext,
+  useMemo,
+  useCallback,
+} from 'react';
 import _ from 'lodash';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router';
@@ -12,9 +20,10 @@ import Loader from 'react-loader-spinner';
 
 import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
+import * as boardListActions from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
 
-import IStoreState, { IBoardState, IEpicsListState } from 'store/IStoreState';
+import IStoreState, { IBoardState, IEpicsListState, IBoardListState } from 'store/IStoreState';
 import { SquareSpinner, Dialog } from 'styles/ThemeComponents';
 import CreateSprintZoneForm from 'components/CreateSprintZoneForm';
 import Sprint from 'components/Sprint';
@@ -30,26 +39,41 @@ import {
   hasStories,
   getLoadMap,
 } from 'utils/Helpers';
-import { ISprint, IEpic } from 'types';
+import {
+  ISprint,
+  IEpic,
+  IStoryRequest,
+  ICrossBoardData,
+  IStory,
+  INotifications,
+  INotification,
+} from 'types';
+import StoriesList from './StoriesList';
+import EpicsList from './EpicsList';
+import SprintStats from './SprintStats';
 
 interface StateSelector {
+  boardListState?: IBoardListState;
   boardState?: IBoardState;
   epicsListState?: IEpicsListState;
 }
 
+export const BoardContext = createContext(null);
+
 function Board() {
   const state =
     useSelector<IStoreState, StateSelector>(state => ({
+      boardListState: state.boardListState,
       boardState: state.boardState,
       epicsListState: state.epicsListState,
     })) || {};
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
-  const { boardState, epicsListState } = state;
+  const { boardState, epicsListState, boardListState } = state;
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, BoundActionsObjectMap>(
-    { ...boardActions, ...epicsActions },
+    { ...boardActions, ...epicsActions, ...boardListActions },
     dispatch
   );
   const { boardId } = useParams();
@@ -57,6 +81,7 @@ function Board() {
   useEffect(() => {
     refreshEpicsList();
     refreshBoard();
+    refreshBoardList();
     const interval = setInterval(() => {
       refreshEpicsList();
       refreshBoard();
@@ -67,10 +92,20 @@ function Board() {
 
   const refreshBoard = () => {
     if (!isNaN(parseInt(boardId))) {
-      actions.fetchBoard(parseInt(boardId)).then(() => {
-        setIsInitialLoad(false);
-      });
+      actions
+        .fetchBoard(parseInt(boardId))
+        .then(() => {
+          setIsInitialLoad(false);
+        })
+        .catch(() => {
+          setIsInitialLoad(false);
+          toast.error('Error loading board');
+        });
     }
+  };
+
+  const refreshBoardList = () => {
+    actions.fetchBoardList();
   };
 
   const refreshEpicsList = () => {
@@ -78,6 +113,8 @@ function Board() {
       actions.fetchEpicsList(parseInt(boardId));
     }
   };
+
+  const { data: boardList = [] } = boardListState;
 
   const {
     data: board = {},
@@ -87,7 +124,7 @@ function Board() {
     sprintAsyncCallStateById = {},
     storyAsyncCallStateById = {},
   } = boardState;
-  const { name, id, sprints = [], unassigned = [] } = board;
+  const { name, id, sprints = [], unassigned = [], notifications = [] } = board;
   const storiesCountMap = getStoriesCountMap(sprints, unassigned);
   const hasStoriesAndSprints = hasStories(storiesCountMap) && sprints && sprints.length > 0;
   const loadMap = getLoadMap(sprints, unassigned);
@@ -161,10 +198,10 @@ function Board() {
     weight?: number;
   }>({});
 
-  const handleAddingDependency = story => {
+  const handleAddingDependency = useCallback(story => {
     setDependencyMode(true);
     setActiveStory(story);
-  };
+  }, []);
 
   const handleDeleteDependency = (fromStoryId: number, toStoryId: number) => {
     actions.deleteDependency(id, fromStoryId, toStoryId).then(() => {
@@ -193,6 +230,38 @@ function Board() {
     } else {
       toast.error('Dependency already exists');
     }
+  };
+
+  const [crossBoardData, setCrossBoardData] = useState<ICrossBoardData>({});
+  const [isFetchingCrossBoardData, setIsFetchingCrossBoardData] = useState(false);
+
+  const handleDependencyBoardSelect = (boardId: number) => {
+    if (!boardId) {
+      setCrossBoardData({});
+      return;
+    }
+    setIsFetchingCrossBoardData(true);
+    actions.fetchBoardDetails(boardId).then(res => {
+      const { data: boardDetails } = res;
+      actions.fetchEpicsListByBoardId(boardId).then(res => {
+        const { data: epics } = res;
+
+        const sprintPreviews = boardDetails.sprints.map(sprint => ({
+          id: sprint.id,
+          name: sprint.name,
+        }));
+        const epicPreviews = epics.map(epic => ({
+          id: epic.id,
+          name: epic.name,
+        }));
+        setCrossBoardData({
+          sprints: sprintPreviews,
+          epics: epicPreviews,
+          boardId: boardId,
+        });
+        setIsFetchingCrossBoardData(false);
+      });
+    });
   };
 
   const handleExportCsv = () => {
@@ -236,6 +305,13 @@ function Board() {
       });
   };
 
+  const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
+  const [requestToWithdraw, setRequestToWithdraw] = useState<IStoryRequest>({});
+  const handleWithdrawRequest = request => {
+    setIsWithdrawDialogOpen(true);
+    setRequestToWithdraw(request);
+  };
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [epicToDelete, setEpicToDelete] = useState<IEpic>({});
   const handleDeleteEpic = (epic: IEpic) => {
@@ -255,275 +331,325 @@ function Board() {
       });
   };
 
+  const handleConfirmRequestWithdraw = () => {
+    actions
+      .withdrawStoryRequest(id, requestToWithdraw)
+      .then(() => {
+        toast.success('Story request withdrawn successfully');
+        setIsWithdrawDialogOpen(false);
+      })
+      .catch(() => {
+        toast.error('Error withdrawing story request.');
+      });
+  };
+
+  const handleSubmitStoryRequest = (storyRequest: IStoryRequest) => {
+    actions
+      .createStoryRequest(id, storyRequest)
+      .then(res => {
+        toast.success('Story request created successfully');
+      })
+      .catch(() => {
+        toast.error('Error creating story request');
+      });
+  };
+
+  const boardApi = useMemo(
+    () => ({
+      delayedHandleEditStory,
+      handleAddingDependency,
+      handleAddAsDependency,
+      handleDeleteDependency,
+      dependencyMode,
+      handleDependencyBoardSelect,
+      handleSubmitStoryRequest,
+      handleDeleteStory,
+      handleWithdrawRequest,
+      isFetchingCrossBoardData,
+      crossBoardData,
+      boardList,
+      epics,
+      sprints,
+    }),
+    [dependencyMode, epics, sprints, crossBoardData, isFetchingCrossBoardData]
+  );
+
+  const { id: activeStoryId } = activeStory;
+
+  const [isNotificationsActive, setIsNotificationsActive] = useState(false);
+
   return (
-    <div className="w-full flex flex-col h-full">
-      <div className={`flex-grow overflow-y-auto ${isUploadingCsv ? 'opacity-75' : ''}`}>
-        {isFetching && isInitialLoad ? (
-          <div className="flex items-stretch h-screen border-4 ">
-            <div className="mx-auto w-1/12 self-center pb-16">
-              <SquareSpinner className="mt-20" />
-            </div>
-          </div>
-        ) : (
-          <div>
-            <div className="flex flex-row">
-              <div className="flex flex-col lg:w-1/5 md:w-1 sm:w-1 pl-4 p-4 h-screen">
-                <div className="flex-grow-0">
-                  <div className="w-full mb-4 flex flex-row items-center">
-                    <Link to="/boards" className="mb-2 flex flex-row items-center">
-                      <ChevronLeft size="14" /> Boards
-                    </Link>
-                  </div>
-                  <div className="w-full mb-4 text-2xl font-bold flex-shrink-0">{name}</div>
-                  <div className="flex-grow-0">
-                    <div className="text-xl mb-3">
-                      Epics <span className="text-sm p-2">{countsPhrase('epic', epics)}</span>
-                    </div>
-                    <div className="mb-4">
-                      <CreateEpicZoneForm onSubmit={handleCreateEpic} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex-grow flex flex-col overflow-scroll">
-                  <div className="flex-grow">
-                    {epics && epics.length > 0 ? (
-                      epics.map((epic, i) => {
-                        const { id: epicId } = epic;
-                        const { [epicId]: epicCallState = {} } = epicAsyncCallStateById;
-                        const { isLoading: isEpicLoading = false } = epicCallState;
-                        return (
-                          <Epic
-                            {...epic}
-                            key={i}
-                            onDelete={handleDeleteEpic}
-                            isLoading={isEpicLoading}
-                          />
-                        );
-                      })
-                    ) : (
-                      <div className="italic text-gray-500">No epics found</div>
-                    )}
-                  </div>
-                </div>
+    <BoardContext.Provider value={boardApi}>
+      <div className="w-full flex flex-col h-full">
+        <div className={`flex-grow overflow-y-auto ${isUploadingCsv ? 'opacity-75' : ''}`}>
+          {isFetching && isInitialLoad ? (
+            <div className="flex items-stretch h-screen border-4 ">
+              <div className="mx-auto w-1/12 self-center pb-16">
+                <SquareSpinner className="mt-20" />
               </div>
-              <div className="w-full flex flex-row">
-                <div className="w-3/4 h-screen flex flex-col bg-gray-100">
-                  <div className="flex flex-grow-0 justify-between items-center mb-4 px-10 py-4">
-                    <div className="mr-2 text-sm text-gray-600">
-                      Last refreshed {moment(lastRefresh).fromNow(false)}
+            </div>
+          ) : (
+            <div>
+              <div className="flex flex-row">
+                <div className="flex flex-col lg:w-1/5 md:w-1 sm:w-1  h-screen">
+                  <div className="flex-grow-0 px-4 pt-4">
+                    <div className="w-full mb-4 flex flex-row items-center">
+                      <Link to="/boards" className="mb-2 flex flex-row items-center">
+                        <ChevronLeft size="14" /> Boards
+                      </Link>
                     </div>
-                    <div className="flex flex-row">
-                      <input
-                        type="file"
-                        id="file"
-                        className="hidden"
-                        ref={uploadInputRef}
-                        onChange={handleFileChange}
-                      />
-                      <button
-                        name="button"
-                        value="Upload"
-                        className="btn btn-primary mr-2"
-                        onClick={handleUploadClick}
-                      >
-                        {isUploadingCsv ? (
-                          <Loader type="ThreeDots" color="#ffffff" width={20} height={20} />
-                        ) : (
-                          'Upload CSV'
-                        )}
-                      </button>{' '}
-                      <button
-                        className="btn btn-primary mr-2"
-                        onClick={handleExportCsv}
-                        disabled={!hasStoriesAndSprints}
-                      >
-                        Export CSV
-                      </button>
-                      <button
-                        className="btn btn-primary"
-                        onClick={handleSolve}
-                        disabled={!hasStoriesAndSprints}
-                      >
-                        Auto Arrange
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex-grow overflow-scroll px-10 pb-16">
-                    <div className="flex flex-row items-center mb-3">
-                      <div className="text-xl">Sprints</div>
-                      <span className="text-sm p-2">{countsPhrase('sprint', sprints)}</span>
-                    </div>
-                    {isSolving || isUploadingCsv ? (
-                      <SquareSpinner className="mt-20" />
-                    ) : (
-                      <div>
-                        {sprints && sprints.length > 0 ? (
-                          sprints.map((sprint, i) => {
-                            const { id: sprintId, tickets, capacity } = sprint;
-                            const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
-                            const { isLoading: isSprintLoading = false } = sprintCallState;
-                            const load = loadMap[sprintId];
-                            const loadLeft = capacity - load;
-                            return (
-                              <Sprint
-                                key={i}
-                                {...sprint}
-                                onDelete={handleDeleteSprint}
-                                onEdit={handleEditSprint}
-                                isLoading={isSprintLoading}
-                              >
-                                <div className="flex flex-row justify-end mt-2 mb-2 text-sm ">
-                                  <div className="flex flex-row bg-gray-200 p-1 rounded-md">
-                                    <div className="mr-2">
-                                      <div className="inline-block mr-1">Stories</div>
-                                      <div className="rounded-md bg-gray-100 inline-block center px-2">
-                                        {storiesCountMap[sprintId]}
-                                      </div>
-                                    </div>
-                                    <div className="mr-2">
-                                      <div className="inline-block mr-1">Current load</div>
-                                      <div className="rounded-md bg-gray-100 inline-block center px-2">
-                                        {load}
-                                      </div>
-                                    </div>
-                                    <div className="mr-2">
-                                      {loadLeft >= 0 && (
-                                        <div className="inline-block mr-1">Load left</div>
-                                      )}
-                                      {!isNaN(loadLeft) ? (
-                                        <div
-                                          className={`rounded-md bg-gray-100 inline-block center px-2 ${
-                                            loadLeft < 0 ? 'text-red-400' : ''
-                                          }`}
-                                        >
-                                          {loadLeft >= 0
-                                            ? loadLeft
-                                            : `Load exceeds by ${Math.abs(loadLeft)}`}
-                                        </div>
-                                      ) : (
-                                        <div>-</div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex flex-wrap mx-auto">
-                                  {tickets && tickets.length > 0 ? (
-                                    tickets.map((story, i) => {
-                                      const { id } = story;
-                                      const { [id]: storyCallState = {} } = storyAsyncCallStateById;
-                                      const { isLoading: isStoryLoading = false } = storyCallState;
-                                      const { id: storyId } = activeStory;
-                                      return (
-                                        <Story
-                                          key={i}
-                                          {...story}
-                                          onDelete={id => handleDeleteStory(id, sprintId)}
-                                          onEdit={delayedHandleEditStory}
-                                          isLoading={isStoryLoading}
-                                          epics={epics}
-                                          sprints={sprints}
-                                          onAddingDependency={handleAddingDependency}
-                                          dependencyMode={dependencyMode}
-                                          isAddingDependency={id === storyId}
-                                          onAddAsDependency={handleAddAsDependency}
-                                          onDeleteDependency={handleDeleteDependency}
-                                        />
-                                      );
-                                    })
-                                  ) : (
-                                    <div className="italic text-gray-500">
-                                      No stories found in this sprint
-                                    </div>
-                                  )}
-                                </div>
-                              </Sprint>
-                            );
-                          })
-                        ) : (
-                          <div className="italic text-gray-500">No Sprints found</div>
-                        )}
-                        <div className="mt-4">
-                          <CreateSprintZoneForm onSubmit={handleCreateSprint} />
-                        </div>
+                    <div className="w-full mb-4 text-2xl font-bold flex-shrink-0">{name}</div>
+                    <div className="flex-grow-0">
+                      <div className="text-xl mb-3">
+                        Epics <span className="text-sm p-2">{countsPhrase('epic', epics)}</span>
                       </div>
-                    )}
-                  </div>
-                </div>
-                <div className="lg:w-1/4 md:w-1 sm:w-1 h-screen overflow-scroll px-10 pt-4 bg-gray-200 flex-grow ">
-                  <div className=" flex flex-row items-center mb-3">
-                    <div className="text-xl">Backlog</div>
-                    <span className="text-sm p-2">{countsPhrase('story', unassigned)}</span>
-                  </div>
-                  {epics && epics.length > 0 ? (
-                    <div>
                       <div className="mb-4">
-                        <CreateStoryZoneForm onSubmit={handleCreateStory} epics={epics} />
-                      </div>
-
-                      <div className="">
-                        {unassigned && unassigned.length > 0 ? (
-                          unassigned.map((story, i) => {
-                            const { id } = story;
-                            const { [id]: storyCallState = {} } = storyAsyncCallStateById;
-                            const { isLoading: isStoryLoading = false } = storyCallState;
-                            const { id: storyId } = activeStory;
-
-                            return (
-                              <Story
-                                key={i}
-                                {...story}
-                                onDelete={handleDeleteStory}
-                                onEdit={delayedHandleEditStory}
-                                isLoading={isStoryLoading}
-                                epics={epics}
-                                sprints={sprints}
-                                onAddingDependency={handleAddingDependency}
-                                onAddAsDependency={handleAddAsDependency}
-                                onDeleteDependency={handleDeleteDependency}
-                                dependencyMode={dependencyMode}
-                                isAddingDependency={id === storyId}
-                              />
-                            );
-                          })
-                        ) : (
-                          <div className="italic text-gray-500">No backlog stories found</div>
-                        )}
+                        <CreateEpicZoneForm onSubmit={handleCreateEpic} />
                       </div>
                     </div>
-                  ) : (
-                    <span className="italic text-gray-500">
-                      Create an Epic first to create stories
-                    </span>
-                  )}
+                  </div>
+
+                  <div
+                    className={`${
+                      !isNotificationsActive ? 'flex-grow' : 'flex-grow-0 h-40'
+                    } flex flex-col overflow-scroll`}
+                  >
+                    <div className="px-4">
+                      <EpicsList
+                        epics={epics}
+                        epicAsyncCallStateById={epicAsyncCallStateById}
+                        handleDeleteEpic={handleDeleteEpic}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className={`${
+                      !isNotificationsActive ? 'flex-grow-0 h-16' : 'flex-grow h-64'
+                    } bg-teal-800 notifications text-white flex flex-col`}
+                  >
+                    <div
+                      className="tab flex justify-end items-center relative text-sm border-t-2 border-gray-300 p-4 "
+                      onClick={() => setIsNotificationsActive(!isNotificationsActive)}
+                    >
+                      <div className="mr-2">Notifications </div>
+                      {notifications && notifications.length > 0 ? (
+                        <div className=" text-xs px-2 py-1 bg-red-600 text-white center rounded-full">
+                          {notifications.length}
+                        </div>
+                      ) : (
+                        <div className="text-xs px-2 py-1 bg-gray-600 text-white center rounded-full">
+                          0
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4 flex-grow overflow-scroll">
+                      {notifications &&
+                        notifications.map((notification: INotification) => {
+                          const {
+                            epic,
+                            sender: senderBoard,
+                            notes,
+                            points,
+                            description,
+                            sprint,
+                          } = notification;
+                          return (
+                            <div className="border-b-2 border-dotted border-teal-700 pb-4 mb-4">
+                              <div className="text-sm">
+                                <span className="font-black">{senderBoard}</span> has requested to
+                                add a story "<span className="font-black">{description}</span>" to
+                                this board in sprint <span className="font-black">{sprint}</span>,
+                                epic <span className="font-black">{epic}</span>
+                              </div>{' '}
+                              {notes && (
+                                <div className="border-l-2 border-teal-500 pl-2 text-sm mt-2">
+                                  Notes:
+                                  <div>{notes}</div>
+                                </div>
+                              )}
+                              <div className="flex flex-row mt-2">
+                                <button className="btn btn-minimal w-1/2 mr-2">Reject</button>
+                                <button className="btn btn-primary w-1/2">Accept</button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full flex flex-row">
+                  <div className="w-3/4 h-screen flex flex-col bg-gray-100">
+                    <div className="flex flex-grow-0 justify-between items-center mb-4 px-10 py-4">
+                      <div className="mr-2 text-sm text-gray-600">
+                        Last refreshed {moment(lastRefresh).fromNow(false)}
+                      </div>
+                      <div className="flex flex-row">
+                        <input
+                          type="file"
+                          id="file"
+                          className="hidden"
+                          ref={uploadInputRef}
+                          onChange={handleFileChange}
+                        />
+                        <button
+                          name="button"
+                          value="Upload"
+                          className="btn btn-primary mr-2"
+                          onClick={handleUploadClick}
+                        >
+                          {isUploadingCsv ? (
+                            <Loader type="ThreeDots" color="#ffffff" width={20} height={20} />
+                          ) : (
+                            'Upload CSV'
+                          )}
+                        </button>{' '}
+                        <button
+                          className="btn btn-primary mr-2"
+                          onClick={handleExportCsv}
+                          disabled={!hasStoriesAndSprints}
+                        >
+                          Export CSV
+                        </button>
+                        <button
+                          className="btn btn-primary"
+                          onClick={handleSolve}
+                          disabled={!hasStoriesAndSprints}
+                        >
+                          Auto Arrange
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-grow overflow-scroll px-10 pb-16">
+                      <div className="flex flex-row items-center mb-3">
+                        <div className="text-xl">Sprints</div>
+                        <span className="text-sm p-2">{countsPhrase('sprint', sprints)}</span>
+                      </div>
+                      {isSolving || isUploadingCsv ? (
+                        <SquareSpinner className="mt-20" />
+                      ) : (
+                        <div>
+                          {sprints && sprints.length > 0 ? (
+                            sprints.map((sprint, i) => {
+                              const { id: sprintId, tickets, capacity } = sprint;
+                              const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
+                              const { isLoading: isSprintLoading = false } = sprintCallState;
+                              const load = loadMap[sprintId];
+                              const loadLeft = capacity - load;
+
+                              return (
+                                <Sprint
+                                  key={i}
+                                  {...sprint}
+                                  onDelete={handleDeleteSprint}
+                                  onEdit={handleEditSprint}
+                                  isLoading={isSprintLoading}
+                                >
+                                  <SprintStats
+                                    storiesCount={storiesCountMap[sprintId]}
+                                    currentLoadCount={load}
+                                    loadLeftCount={loadLeft}
+                                  />
+                                  <StoriesList
+                                    sprintId={sprintId}
+                                    stories={tickets}
+                                    activeStoryId={activeStoryId}
+                                    storyAsyncCallStateById={storyAsyncCallStateById}
+                                    emptyListMessage="No stories found in this sprint"
+                                  />
+                                </Sprint>
+                              );
+                            })
+                          ) : (
+                            <div className="italic text-gray-500">No Sprints found</div>
+                          )}
+                          <div className="mt-4">
+                            <CreateSprintZoneForm onSubmit={handleCreateSprint} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="lg:w-1/4 md:w-1 sm:w-1 h-screen overflow-scroll px-10 pt-4 bg-gray-200 flex-grow ">
+                    <div className=" flex flex-row items-center mb-3">
+                      <div className="text-xl">Backlog</div>
+                      <span className="text-sm p-2">{countsPhrase('story', unassigned)}</span>
+                    </div>
+                    {epics && epics.length > 0 ? (
+                      <div>
+                        <div className="mb-4">
+                          <CreateStoryZoneForm onSubmit={handleCreateStory} epics={epics} />
+                        </div>
+                        <StoriesList
+                          stories={unassigned}
+                          activeStoryId={activeStoryId}
+                          storyAsyncCallStateById={storyAsyncCallStateById}
+                          emptyListMessage="No backlog stories found"
+                        />
+                      </div>
+                    ) : (
+                      <span className="italic text-gray-500">
+                        Create an Epic first to create stories
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-      {dependencyMode && <DependencyModeModal story={activeStory} onCancel={exitDependencyMode} />}
-      {dependencyMode}
-
-      <Dialog
-        open={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleConfirmEpicDelete}
-        closeOnOutsideClick={true}
-        className="w-1/3"
-        intent="danger"
-      >
-        <div className="mb-3">
-          You are deleting epic:{' '}
-          <div className="flex flex-row items-center mt-4">
-            <span className="tag mr-2">{epicToDelete.id}</span>
-            <div className="text-lg">{epicToDelete.name}</div>
-          </div>
+          )}
         </div>
+        {dependencyMode && (
+          <DependencyModeModal story={activeStory} onCancel={exitDependencyMode} />
+        )}
+        {dependencyMode}
 
-        <div>This will delete all stories under this epic. Are you sure you want to delete?</div>
-      </Dialog>
-    </div>
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={handleConfirmEpicDelete}
+          closeOnOutsideClick={true}
+          className="w-1/3"
+          intent="danger"
+        >
+          <div className="mb-3">
+            You are deleting epic:{' '}
+            <div className="flex flex-row items-center mt-4">
+              <span className="tag mr-2">{epicToDelete.id}</span>
+              <div className="text-lg">{epicToDelete.name}</div>
+            </div>
+          </div>
+
+          <div>This will delete all stories under this epic. Are you sure you want to delete?</div>
+        </Dialog>
+        <Dialog
+          open={isWithdrawDialogOpen}
+          onClose={() => setIsWithdrawDialogOpen(false)}
+          onConfirm={handleConfirmRequestWithdraw}
+          closeOnOutsideClick={true}
+          className="w-1/3"
+          intent="danger"
+        >
+          <div className="mb-3">
+            You are withdrawing request for this story:
+            <div className="flex flex-col items-center mt-4">
+              <div className="mb-2">{requestToWithdraw.storyDescription}</div>
+              <div>
+                <input
+                  className=""
+                  type="text"
+                  name="notes"
+                  placeholder="notes"
+                  onChange={e =>
+                    setRequestToWithdraw({ ...requestToWithdraw, notes: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>Withdraw?</div>
+        </Dialog>
+      </div>
+    </BoardContext.Provider>
   );
 }
 

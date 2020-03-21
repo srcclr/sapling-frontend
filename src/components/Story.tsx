@@ -1,51 +1,62 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useContext } from 'react';
 import _ from 'lodash';
-import { IStory, IEpic, ISprint } from 'types';
-import { Trash, X } from 'react-feather';
+import { IStory, STORY_REQUEST_ACTION, IStoryRequestWithViewData } from 'types';
+import { Trash, X, MoreVertical } from 'react-feather';
 import Loader from 'react-loader-spinner';
 import { useForm } from 'react-hook-form';
 import { useOnClickOutside } from 'hooks';
 import { getNumberValue } from 'utils/Helpers';
 import classnames from 'classnames';
+import CrossBoardDependencies from './CrossBoardDependencies';
+import CrossBoardDependenciesList from './CrossBoardDependenciesList';
+import { BoardContext } from './Board';
 
 interface IStoryProps {
-  onDelete: (epicId: number) => void;
-  onEdit: (story: IStory) => void;
   isLoading: boolean;
-  epics: IEpic[];
-  sprints: ISprint[];
-  onAddingDependency: (story: IStory) => void;
-  onDeleteDependency: (from: number, to: number) => void;
+  sprintId?: number;
   isAddingDependency: boolean;
-  onAddAsDependency: (storyId: number) => void;
-  dependencyMode: boolean;
 }
 
 const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   id,
   dependencies,
+  crossBoardDependencies,
   description,
+  sprintId,
   epic,
   home,
   pin,
   weight,
-  onDelete,
-  onEdit,
-  onAddingDependency,
   isAddingDependency,
-  onAddAsDependency,
-  onDeleteDependency,
   isLoading,
-  epics,
-  sprints,
-  dependencyMode,
 }) => {
   const [isActive, setIsActive] = useState(false);
+  const [isDependenciesViewActive, setIsDependenciesViewActive] = useState(false);
+
+  const board = useContext(BoardContext);
+
+  const {
+    delayedHandleEditStory,
+    handleAddingDependency,
+    handleAddAsDependency,
+    handleDeleteDependency,
+    dependencyMode,
+    handleDependencyBoardSelect,
+    handleSubmitStoryRequest,
+    handleDeleteStory,
+    handleWithdrawRequest,
+    isFetchingCrossBoardData,
+    crossBoardData,
+    boardList,
+    epics,
+    sprints,
+  } = board;
 
   // For detecting outside clicks
   const ref = useRef();
   useOnClickOutside(ref, () => {
     setIsActive(false);
+    setIsDependenciesViewActive(false);
   });
 
   const pinValue = getNumberValue(pin);
@@ -53,19 +64,34 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
 
   const handleFormSubmit = values => {
     event.preventDefault();
-    onEdit({
+    delayedHandleEditStory({
       id,
       ...values,
     });
   };
 
-  const handleAddingDependency = () => {
-    onAddingDependency({ id, description, weight, epic: epicValue, dependencies });
-    setIsActive(false);
-  };
+  console.log(crossBoardData);
 
-  const handleAddAsDependency = () => {
-    onAddAsDependency(id);
+  const handleStoryRequestAction = (
+    requestAction: STORY_REQUEST_ACTION,
+    storyRequestData: IStoryRequestWithViewData
+  ) => {
+    console.log(storyRequestData);
+    switch (requestAction) {
+      case STORY_REQUEST_ACTION.Withdraw: {
+        return handleWithdrawRequest(storyRequestData);
+      }
+      case STORY_REQUEST_ACTION.Resubmit: {
+        const requestData = {
+          ...storyRequestData,
+          storyId: id,
+        };
+
+        delete requestData.id;
+        delete requestData.state;
+        return handleSubmitStoryRequest(requestData);
+      }
+    }
   };
 
   const activeEpic = epics && epics.find(e => e.id === epicValue);
@@ -90,7 +116,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   });
 
   const handleDelete = () => {
-    onDelete(id);
+    handleDeleteStory(id, sprintId);
     reset(defaultValues);
   };
 
@@ -100,25 +126,28 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   };
 
   const storyClassNames = classnames({
-    active: isActive,
+    active: isActive || isDependenciesViewActive,
     'border-2 border-teal-200': isAddingDependency,
     'cursor-pointer hover:shadow-lg': isDependencyCandidate,
   });
 
   const detailsClassNames = classnames({
     'active shadow-lg': isActive,
-    'cursor-pointer': !isActive,
+  });
+
+  const dependenciesClassName = classnames({
+    'active shadow-lg ': isDependenciesViewActive,
   });
 
   return (
     <div
       className={`story ${storyClassNames}`}
       ref={ref}
-      onClick={isDependencyCandidate ? handleAddAsDependency : null}
+      onClick={isDependencyCandidate ? () => handleAddAsDependency(id) : null}
     >
       <div className={`flex flex-col details ${detailsClassNames}`}>
         <div
-          className={`flex-grow p-4  flex overflow-hidden flex-row items-start justify-between  `}
+          className={`flex-grow p-4 flex overflow-hidden flex-row items-start justify-between  `}
           onClick={!isDependencyCandidate ? () => setIsActive(true) : null}
         >
           <div>
@@ -130,7 +159,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                   weight={defaultValues.weight}
                   epicName={defaultValues.epicName}
                   sprintName={defaultValues.sprintName}
-                  onClick={toggleActive}
+                  onClick={!isDependencyCandidate ? toggleActive : null}
                 />
               </div>
             ) : (
@@ -213,28 +242,82 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
             </div>
           </div>
         </div>
-        <div className="flex-grow-0 mt-1 px-4 py-2 bg-gray-200">
-          {dependencies && dependencies.length > 0 ? (
-            dependencies.map((dep, i) => {
-              return (
-                <div key={i} className="bg-gray-100 text-xs p-1 rounded-md mr-1 inline-block ">
-                  <div className="flex flex-row items-center">
-                    {dep}{' '}
-                    <X
-                      size="16"
-                      className="clickable text-red-500"
-                      onClick={() => onDeleteDependency(id, dep)}
-                    />
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <span className="text-sm italic text-gray-400">No dependencies</span>
-          )}
-          <a className="cursor-pointer text-sm ml-1" onClick={handleAddingDependency}>
-            Add
-          </a>
+        <div className="relative flex-grow-0 mt-1 bg-gray-200 h-10">
+          <div
+            className={`dependencies w-full flex flex-row items-start justify-between bg-gray-200 ${dependenciesClassName}`}
+          >
+            <div className={`px-4 py-2 w-full`}>
+              <div>
+                {dependencies && dependencies.length > 0 ? (
+                  dependencies.map((dep, i) => {
+                    return (
+                      <div
+                        key={i}
+                        className="bg-gray-100 text-xs p-1 rounded-md mr-1 inline-block "
+                      >
+                        <div className="flex flex-row items-center">
+                          {dep}{' '}
+                          <X
+                            size="16"
+                            className="clickable text-red-500"
+                            onClick={() => handleDeleteDependency(id, dep)}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <span className="text-sm italic text-gray-400">No dependencies</span>
+                )}
+                <a
+                  className="cursor-pointer text-sm ml-1"
+                  onClick={() => {
+                    handleAddingDependency({
+                      id,
+                      description,
+                      weight,
+                      epic: epicValue,
+                      dependencies,
+                    });
+                    setIsActive(false);
+                    setIsDependenciesViewActive(false);
+                  }}
+                >
+                  Add
+                </a>
+              </div>
+
+              <div className="mt-2 text-xs cross">
+                <div className="font-semibold mb-2">Cross Board Dependencies</div>
+                <CrossBoardDependencies
+                  boardList={boardList}
+                  onBoardSelect={handleDependencyBoardSelect}
+                  data={crossBoardData}
+                  isFetching={isFetchingCrossBoardData}
+                  onSubmitRequest={values => {
+                    handleSubmitStoryRequest({
+                      ...values,
+                      storyPoints: weight,
+                      storyDescription: description,
+                      storyId: id,
+                    });
+                  }}
+                />
+                <CrossBoardDependenciesList
+                  boardList={boardList}
+                  dependencies={crossBoardDependencies}
+                  onActionClick={handleStoryRequestAction}
+                />
+              </div>
+            </div>
+            <div className="py-2 pr-2">
+              <MoreVertical
+                size={20}
+                className="text-teal-900 cursor-pointer hover:text-teal-600"
+                onClick={() => setIsDependenciesViewActive(true)}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -246,9 +329,9 @@ const DetailsView = ({ id, description, weight, epicName, sprintName, onClick })
     <div className="w-full flex cursor-pointer bg-white" onClick={onClick}>
       <div className="flex-grow">
         <div className="text-sm font-semibold mb-2">{description} </div>
-        <div className="text-sm ">Story Points: {weight} </div>
-        <div className="text-sm ">Epic: {epicName} </div>
-        {sprintName && <div className="text-sm ">Pin: {sprintName} </div>}
+        <div className="text-xs ">Story Points: {weight} </div>
+        <div className="text-xs ">Epic: {epicName} </div>
+        {sprintName && <div className="text-xs ">Pin: {sprintName} </div>}
       </div>
     </div>
   );

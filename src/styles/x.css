@@ -108,6 +108,19 @@ textarea {
   @apply text-teal-400;
 }
 
+.tab {
+  @apply bg-teal-800 text-white cursor-pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tab:hover {
+  @apply bg-teal-500;
+}
+
+.notifications {
+  transition: height 0.2s ease;
+}
+
 @tailwind utilities;
 
 .actionline .content {
@@ -151,6 +164,24 @@ textarea {
 
 .story .details.active {
   @apply z-10 h-64 rounded-sm;
+}
+
+.story .dependencies.active {
+  @apply z-10 absolute  top-0 overflow-scroll;
+  height: 400px;
+}
+
+.story .dependencies {
+  @apply absolute w-full bg-gray-200 h-10 overflow-hidden;
+  transition: height 0.2s ease;
+}
+
+.story .dependencies.active .cross {
+  @apply block;
+}
+
+.story .dependencies .cross {
+  @apply hidden;
 }
 
 .story .details {

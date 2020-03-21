@@ -1,6 +1,13 @@
 import FileSaver from 'file-saver';
 import { AsyncSubType } from 'actions/actionTypes';
-import { IError, ISprint, IStory } from 'types';
+import {
+  IError,
+  ISprint,
+  IStory,
+  SelectOption,
+  STORY_REQUEST_STATE,
+  STORY_REQUEST_ACTION,
+} from 'types';
 import _ from 'lodash';
 
 export const startCSVDownload = (fileName, data) => {
@@ -205,4 +212,25 @@ export const hasStories = storiesCountMap => {
   return (
     storiesCountMap['backlog'] > 0 || Object.keys(storiesCountMap).find(k => storiesCountMap[k] > 0)
   );
+};
+
+export const hasEmptyOption = (options: SelectOption[], defaultNonSelectLabel = '-') => {
+  return [{ value: '', label: defaultNonSelectLabel }, ...options];
+};
+
+export const getStoryRequestActionByState = requestState => {
+  switch (requestState) {
+    case STORY_REQUEST_STATE.Accepted: {
+      return STORY_REQUEST_ACTION.Withdraw;
+    }
+    case STORY_REQUEST_STATE.Rejected: {
+      return STORY_REQUEST_ACTION.Resubmit;
+    }
+    case STORY_REQUEST_STATE.Withdrawn: {
+      return STORY_REQUEST_ACTION.Resubmit;
+    }
+    case STORY_REQUEST_STATE.Pending: {
+      return STORY_REQUEST_ACTION.Withdraw;
+    }
+  }
 };
