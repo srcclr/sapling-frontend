@@ -456,7 +456,11 @@ function Board() {
                         </div>
                       )}
                     </div>
-                    <div className="p-4 flex-grow overflow-scroll">
+                    <div
+                      className={`${
+                        !isNotificationsActive ? 'hidden' : ''
+                      } p-4 flex-grow overflow-scroll`}
+                    >
                       {notifications && notifications.length > 0 ? (
                         notifications.map((notification: INotification, i) => {
                           const {
