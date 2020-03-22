@@ -4,6 +4,7 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import path from 'path';
+import TerserPlugin from 'terser-webpack-plugin';
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('production'),
@@ -25,6 +26,13 @@ export default {
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
     filename: '[name].[contenthash].js',
+  },
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        exclude: '/node_modules/react-archer',
+      }),
+    ],
   },
   plugins: [
     // Tells React to build in prod mode. https://facebook.github.io/react/downloads.html

@@ -3,6 +3,7 @@ type LoginActionCreators = typeof import('./login');
 type BoardActionCreators = typeof import('./boardActions');
 type BoardListActionCreators = typeof import('./boardListActions');
 type EpicsActionCreators = typeof import('./epicsActions');
+type DependenciesViewActionCreators = typeof import('./dependenciesViewActions');
 type myActionCreators = typeof import('./myActions');
 
 type AsyncPayload<R, S> = {
@@ -29,6 +30,7 @@ type ActionCreators = LoginActionCreators &
   BoardListActionCreators &
   BoardActionCreators &
   EpicsActionCreators &
+  DependenciesViewActionCreators &
   myActionCreators;
 
 export type ActionMapObject = {

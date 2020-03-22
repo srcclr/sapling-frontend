@@ -78,6 +78,17 @@ export interface ICrossBoardData {
 export type SprintPreview = Pick<ISprint, 'id' | 'name'>;
 export type EpicPreview = Pick<IEpic, 'id' | 'name'>;
 
+interface Dep {
+  name: string;
+  sprint?: number;
+}
+
+export interface ICrossDeps {
+  deps: { from: Dep, to: Dep }[];
+  maxSprint: number;
+}
+
+
 export interface IError {
   error?: {
     message?: string;

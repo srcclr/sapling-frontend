@@ -11,6 +11,7 @@ import IStoreState, { ILoginState, IMyState } from 'store/IStoreState';
 import Login from 'components/Login';
 import SignUp from 'components/SignUp';
 import BoardList from 'components/BoardList';
+import DependenciesView from 'components/DependenciesView';
 
 import { checkUserStatus } from 'actions/appLoad';
 import Board from 'components/Board';
@@ -43,6 +44,7 @@ export function App() {
           <Route exact path="/login" component={Login} />
           <Route exact path="/signup" component={SignUp} />
           <Route exact path="/boards" component={BoardList} />
+          <Route exact path="/boards/dependencies" component={DependenciesView} />
           <Route exact path="/boards/:boardId" component={Board} />
         </Switch>
       )}
