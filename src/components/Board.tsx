@@ -47,6 +47,7 @@ import {
   IStory,
   INotifications,
   INotification,
+  STORY_REQUEST_ACTION,
 } from 'types';
 import StoriesList from './StoriesList';
 import EpicsList from './EpicsList';
@@ -354,6 +355,20 @@ function Board() {
       });
   };
 
+  const handleAcceptOrRejectStoryRequest = (
+    requestId: number,
+    action: STORY_REQUEST_ACTION.Accept | STORY_REQUEST_ACTION.Reject
+  ) => {
+    actions
+      .acceptOrRejectStoryRequest(id, requestId, action)
+      .then(res => {
+        toast.success('Success');
+      })
+      .catch(() => {
+        toast.error('Error');
+      });
+  };
+
   const boardApi = useMemo(
     () => ({
       delayedHandleEditStory,
@@ -446,6 +461,7 @@ function Board() {
                       {notifications &&
                         notifications.map((notification: INotification) => {
                           const {
+                            id: requestId,
                             epic,
                             sender: senderBoard,
                             notes,
@@ -468,8 +484,28 @@ function Board() {
                                 </div>
                               )}
                               <div className="flex flex-row mt-2">
-                                <button className="btn btn-minimal w-1/2 mr-2">Reject</button>
-                                <button className="btn btn-primary w-1/2">Accept</button>
+                                <button
+                                  className="btn btn-minimal w-1/2 mr-2"
+                                  onClick={() =>
+                                    handleAcceptOrRejectStoryRequest(
+                                      requestId,
+                                      STORY_REQUEST_ACTION.Reject
+                                    )
+                                  }
+                                >
+                                  Reject
+                                </button>
+                                <button
+                                  className="btn btn-primary w-1/2"
+                                  onClick={() =>
+                                    handleAcceptOrRejectStoryRequest(
+                                      requestId,
+                                      STORY_REQUEST_ACTION.Accept
+                                    )
+                                  }
+                                >
+                                  Accept
+                                </button>
                               </div>
                             </div>
                           );

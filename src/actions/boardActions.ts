@@ -1,4 +1,4 @@
-import { ILoginParams, IStoryRequest } from '../types';
+import { ILoginParams, IStoryRequest, STORY_REQUEST_ACTION } from '../types';
 import ApiService from 'utils/ApiService';
 import config from 'utils/config';
 import { ISprint, IStory, IBoard } from 'types';
@@ -182,11 +182,26 @@ export function createStoryRequest(boardId: number, storyRequest: IStoryRequest)
 
 export function withdrawStoryRequest(boardId: number, storyRequest: IStoryRequest) {
   const { id, notes } = storyRequest;
-  console.log(notes);
+
   return {
     type: 'WITHDRAW_STORY_REQUEST',
     callApi: () => ApiService.post(`/board/${boardId}/request/${id}/withdraw`, { data: { notes } }),
     payload: { request: { data: { storyRequest } }, success: { data: {} as IStoryRequest } },
+  } as const;
+}
+
+export function acceptOrRejectStoryRequest(
+  boardId: number,
+  requestId: number,
+  action: STORY_REQUEST_ACTION.Accept | STORY_REQUEST_ACTION.Reject
+) {
+  return {
+    type: 'ACCEPT_STORY_REQUEST',
+    callApi: () =>
+      ApiService.post(`/board/${boardId}/request/${requestId}/${action.toLowerCase()}`, {
+        data: { notes: 'sfdsf' },
+      }),
+    payload: { request: { data: { requestId } }, success: {} },
   } as const;
 }
 
