@@ -10,6 +10,18 @@ export function fetchEpicsList(boardId: number) {
   } as const;
 }
 
+// This is a workaround and is obviously a duplicate.
+// Until we have a better endpoint to get epics and sprints at one go,
+// we will use this for the inter board dependency use case.
+
+export function fetchEpicsListByBoardId(boardId: number) {
+  return {
+    type: 'FETCH_EPICS_LIST_BY_BOARD_ID',
+    callApi: () => ApiService.get(`/board/${boardId}/epics`),
+    payload: { request: { data: { boardId } }, success: { data: [] as IEpic[] } },
+  } as const;
+}
+
 export function deleteEpic(epicId: number) {
   return {
     type: 'DELETE_EPIC',

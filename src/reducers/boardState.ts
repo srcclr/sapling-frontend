@@ -89,6 +89,7 @@ const boardListState = (state: IBoardState = initialState, action: Actions) =>
       case 'UPDATE_STORY': {
         const { data } = action.payload.request;
         const { story } = data;
+
         const { id: storyId } = story;
         asyncActionReducerById(draft, action, storyId, ['storyAsyncCallStateById'], () => {
           // BE currently does not return updated Sprint.
@@ -99,10 +100,16 @@ const boardListState = (state: IBoardState = initialState, action: Actions) =>
           // Look for story/ticket in unassigned/backlogs.
           if (sprintIndex >= 0) {
             ticketIndex = _.findIndex(draft.data.sprints[sprintIndex].tickets, { id: storyId });
-            draft.data.sprints[sprintIndex].tickets[ticketIndex] = story;
+            draft.data.sprints[sprintIndex].tickets[ticketIndex] = {
+              ...draft.data.sprints[sprintIndex].tickets[ticketIndex],
+              ...story,
+            };
           } else {
             ticketIndex = _.findIndex(draft.data.unassigned, { id: storyId });
-            draft.data.unassigned[ticketIndex] = story;
+            draft.data.unassigned[ticketIndex] = {
+              ...draft.data.unassigned[ticketIndex],
+              ...story,
+            };
           }
         });
         return;

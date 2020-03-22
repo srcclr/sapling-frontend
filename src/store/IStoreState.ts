@@ -18,9 +18,15 @@ export interface IDependenciesViewState {
 }
 
 export interface IBoardListState {
-  data?: IBoard[];
+  data?: IBoardListItem[];
   isFetching?: boolean;
   errorMessage?: string;
+}
+
+export interface IBoardListItem {
+  id: number;
+  name: string;
+  owner: string;
 }
 
 export interface IEpicsListState {

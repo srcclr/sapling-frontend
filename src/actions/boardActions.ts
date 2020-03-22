@@ -1,4 +1,4 @@
-import { ILoginParams } from '../types';
+import { ILoginParams, IStoryRequest, STORY_REQUEST_ACTION } from '../types';
 import ApiService from 'utils/ApiService';
 import config from 'utils/config';
 import { ISprint, IStory, IBoard } from 'types';
@@ -169,5 +169,51 @@ export function uploadCsv(boardId: number, file) {
         headers: { type: '' },
       }),
     payload: { request: { data: { boardId } } },
+  } as const;
+}
+
+export function createStoryRequest(boardId: number, storyRequest: IStoryRequest) {
+  return {
+    type: 'CREATE_STORY_REQUEST',
+    callApi: () => ApiService.post(`/board/${boardId}/requests`, { data: storyRequest }),
+    payload: { request: { data: { storyRequest } }, success: { data: {} as IStoryRequest } },
+  } as const;
+}
+
+export function withdrawStoryRequest(boardId: number, storyRequest: IStoryRequest) {
+  const { id, notes } = storyRequest;
+
+  return {
+    type: 'WITHDRAW_STORY_REQUEST',
+    callApi: () => ApiService.post(`/board/${boardId}/request/${id}/withdraw`, { data: { notes } }),
+    payload: { request: { data: { storyRequest } }, success: { data: {} as IStoryRequest } },
+  } as const;
+}
+
+export function acceptOrRejectStoryRequest(
+  boardId: number,
+  requestId: number,
+  action: STORY_REQUEST_ACTION.Accept | STORY_REQUEST_ACTION.Reject
+) {
+  return {
+    type: 'ACCEPT_STORY_REQUEST',
+    callApi: () =>
+      ApiService.post(`/board/${boardId}/request/${requestId}/${action.toLowerCase()}`, {
+        data: { notes: 'sfdsf' },
+      }),
+    payload: { request: { data: { requestId } }, success: {} },
+  } as const;
+}
+
+// This is just a workaround and needs revision because this is a duplicate of FETCH_BOARD action
+// Requires endpoint to return epics and sprints by board Id
+// Use case for this now is to retrieve epic and sprints to select for interboard dependency
+export function fetchBoardDetails(boardId: number) {
+  const endpoint = `${config.API_URL}/boards`;
+
+  return {
+    type: 'FETCH_BOARD_DETAILS',
+    callApi: () => ApiService.get(`/board/${boardId}`),
+    payload: { request: { data: { boardId } }, success: { data: {} } },
   } as const;
 }
