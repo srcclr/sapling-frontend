@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Trash, Edit2 } from 'react-feather';
+import { Trash, Edit2, ChevronRight } from 'react-feather';
 import { useForm } from 'react-hook-form';
 
 import { deleteBoard } from 'actions/boardActions';
@@ -127,10 +127,14 @@ function BoardList() {
           No boards founds, create your first one!
         </div>
       )}
-
-      <Link to={`/boards/dependencies`} className="text-2xl font-light leading-relaxed mr-2">
-        Dependencies
-      </Link>
+      <div className="border-t-2 border-dotted border-gray-200 py-4 mt-4">
+        <Link
+          to={`/boards/dependencies`}
+          className="text-1xl font-light leading-relaxed mr-2 flex flex-row items-center"
+        >
+          Dependencies <ChevronRight size="14" />
+        </Link>
+      </div>
 
       <Dialog
         open={isDeleteDialogOpen}

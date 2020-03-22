@@ -144,6 +144,7 @@
     "sass": "1.25.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.0",
+    "terser-webpack-plugin": "2.3.5",
     "ts-jest": "23.10.4",
     "tslint-react": "3.6.0",
     "typescript": "3.7.4",
