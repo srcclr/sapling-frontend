@@ -45,7 +45,6 @@ import {
   IStoryRequest,
   ICrossBoardData,
   IStory,
-  INotifications,
   INotification,
   STORY_REQUEST_ACTION,
 } from 'types';
@@ -458,10 +457,10 @@ function Board() {
                       )}
                     </div>
                     <div className="p-4 flex-grow overflow-scroll">
-                      {notifications &&
-                        notifications.map((notification: INotification) => {
+                      {notifications && notifications.length > 0 ? (
+                        notifications.map((notification: INotification, i) => {
                           const {
-                            id: requestId,
+                            storyRequestId,
                             epic,
                             sender: senderBoard,
                             notes,
@@ -470,7 +469,10 @@ function Board() {
                             sprint,
                           } = notification;
                           return (
-                            <div className="border-b-2 border-dotted border-teal-700 pb-4 mb-4">
+                            <div
+                              key={i}
+                              className="border-b-2 border-dotted border-teal-700 pb-4 mb-4"
+                            >
                               <div className="text-sm">
                                 <span className="font-black">{senderBoard}</span> has requested to
                                 add a story "<span className="font-black">{description}</span>" to
@@ -488,7 +490,7 @@ function Board() {
                                   className="btn btn-minimal w-1/2 mr-2"
                                   onClick={() =>
                                     handleAcceptOrRejectStoryRequest(
-                                      requestId,
+                                      storyRequestId,
                                       STORY_REQUEST_ACTION.Reject
                                     )
                                   }
@@ -499,7 +501,7 @@ function Board() {
                                   className="btn btn-primary w-1/2"
                                   onClick={() =>
                                     handleAcceptOrRejectStoryRequest(
-                                      requestId,
+                                      storyRequestId,
                                       STORY_REQUEST_ACTION.Accept
                                     )
                                   }
@@ -509,7 +511,10 @@ function Board() {
                               </div>
                             </div>
                           );
-                        })}
+                        })
+                      ) : (
+                        <div className="italic text-teal-600 text-sm">No new notifications</div>
+                      )}
                     </div>
                   </div>
                 </div>

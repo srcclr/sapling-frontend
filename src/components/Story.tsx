@@ -21,6 +21,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   id,
   dependencies,
   crossBoardDependencies,
+  crossBoardDependents = false,
   description,
   sprintId,
   epic,
@@ -70,13 +71,10 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     });
   };
 
-  console.log(crossBoardData);
-
   const handleStoryRequestAction = (
     requestAction: STORY_REQUEST_ACTION,
     storyRequestData: IStoryRequestWithViewData
   ) => {
-    console.log(storyRequestData);
     switch (requestAction) {
       case STORY_REQUEST_ACTION.Withdraw: {
         return handleWithdrawRequest(storyRequestData);
@@ -133,6 +131,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
 
   const detailsClassNames = classnames({
     'active shadow-lg': isActive,
+    'border-r-2  border-green-500': crossBoardDependents,
   });
 
   const dependenciesClassName = classnames({
@@ -147,85 +146,97 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     >
       <div className={`flex flex-col details ${detailsClassNames}`}>
         <div
-          className={`flex-grow p-4 flex overflow-hidden flex-row items-start justify-between  `}
+          className={`flex-grow p-4 flex overflow-hidden flex-row items-start justify-between relative `}
           onClick={!isDependencyCandidate ? () => setIsActive(true) : null}
         >
-          <div>
-            {!isActive ? (
-              <div className="flex-grow ">
-                <DetailsView
-                  description={defaultValues.description}
-                  id={id}
-                  weight={defaultValues.weight}
-                  epicName={defaultValues.epicName}
-                  sprintName={defaultValues.sprintName}
-                  onClick={!isDependencyCandidate ? toggleActive : null}
-                />
-              </div>
-            ) : (
-              <form
-                onSubmit={handleSubmit(handleFormSubmit)}
-                onChange={handleSubmit(handleFormSubmit)}
-                className={`flex-grow ${isLoading ? 'opacity-50' : ''}`}
-              >
-                <div className="flex lg:flex-col md:flex-col sm:flex-col mb-2 ">
-                  <textarea
-                    className="mb-2 border-b-2 border-dotted border-gray-200 placeholder-gray-500 w-full minimal text-sm font-semibold"
-                    type="text"
-                    rows={3}
-                    name="description"
-                    placeholder="Story"
-                    ref={register({ required: true })}
+          <div className="">
+            <div className="">
+              {!isActive ? (
+                <div className="flex-grow ">
+                  <DetailsView
+                    description={defaultValues.description}
+                    id={id}
+                    weight={defaultValues.weight}
+                    epicName={defaultValues.epicName}
+                    sprintName={defaultValues.sprintName}
+                    onClick={!isDependencyCandidate ? toggleActive : null}
                   />
-                  <div className="flex flex-row items-center w-full text-xs">
-                    <div className="mr-1">Story Points</div>
-                    <input
-                      className="w-full mb-2 placeholder-gray-500 w-full minimal"
-                      type="number"
-                      name="weight"
-                      placeholder="Capacity (eg. 10)"
-                      ref={register}
-                    />
-                  </div>
-                  <div className="flex flex-row items-center w-full text-xs">
-                    <div className="mr-1">Epic</div>
-                    <select
-                      className="w-full rounded-sm bg-transparent p-1"
-                      name="epic"
-                      ref={register}
-                    >
-                      {epics &&
-                        epics.map((epic, i) => {
-                          const { id, name } = epic;
-                          return (
-                            <option key={i} value={id}>
-                              {name}
-                            </option>
-                          );
-                        })}
-                    </select>
-                  </div>
-                  <div className="flex flex-row items-center w-full text-xs">
-                    <div className="mr-1 w-1/5">Pin to</div>
-                    <select
-                      className="w-full rounded-sm bg-transparent p-1"
-                      name="pin"
-                      ref={register}
-                    >
-                      <option value="">None</option>
-                      {sprints &&
-                        sprints.map((sprint, i) => {
-                          const { id, name } = sprint;
-                          return (
-                            <option key={i} value={id}>
-                              {name}
-                            </option>
-                          );
-                        })}
-                    </select>
-                  </div>
                 </div>
-              </form>
+              ) : (
+                <form
+                  onSubmit={handleSubmit(handleFormSubmit)}
+                  onChange={handleSubmit(handleFormSubmit)}
+                  className={`flex-grow ${isLoading ? 'opacity-50' : ''}`}
+                >
+                  <div className="flex lg:flex-col md:flex-col sm:flex-col mb-2 ">
+                    <textarea
+                      className={`mb-2 ${
+                        !crossBoardDependents
+                          ? 'border-b-2 border-dotted border-gray-200'
+                          : 'text-gray-600'
+                      } placeholder-gray-500 w-full minimal text-sm font-semibold`}
+                      type="text"
+                      rows={3}
+                      name="description"
+                      placeholder="Story"
+                      ref={register({ required: true })}
+                      disabled={crossBoardDependents}
+                    />
+                    <div className="flex flex-row items-center w-full text-xs">
+                      <div className="mr-1">Story Points</div>
+                      <input
+                        className="w-full mb-2 placeholder-gray-500 w-full minimal"
+                        type="number"
+                        name="weight"
+                        placeholder="Capacity (eg. 10)"
+                        ref={register}
+                      />
+                    </div>
+                    <div className="flex flex-row items-center w-full text-xs">
+                      <div className="mr-1">Epic</div>
+                      <select
+                        className="w-full rounded-sm bg-transparent p-1"
+                        name="epic"
+                        ref={register}
+                      >
+                        {epics &&
+                          epics.map((epic, i) => {
+                            const { id, name } = epic;
+                            return (
+                              <option key={i} value={id}>
+                                {name}
+                              </option>
+                            );
+                          })}
+                      </select>
+                    </div>
+                    <div className="flex flex-row items-center w-full text-xs">
+                      <div className="mr-1 w-1/5">Pin to</div>
+                      <select
+                        className="w-full rounded-sm bg-transparent p-1"
+                        name="pin"
+                        ref={register}
+                      >
+                        <option value="">None</option>
+                        {sprints &&
+                          sprints.map((sprint, i) => {
+                            const { id, name } = sprint;
+                            return (
+                              <option key={i} value={id}>
+                                {name}
+                              </option>
+                            );
+                          })}
+                      </select>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>
+            {crossBoardDependents && (
+              <div className="text-xs absolute bottom-0 right-0">
+                <div className="py-1 px-2 bg-green-500 text-white">Cross Board</div>
+              </div>
             )}
           </div>
 
@@ -236,8 +247,10 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
             <div className=" h-6 w-6 flex flex-row items-center justify-center">
               {isLoading ? (
                 <Loader type="Grid" width={13} height={13} />
-              ) : (
+              ) : !crossBoardDependents ? (
                 <Trash size="16" className="clickable" onClick={handleDelete} />
+              ) : (
+                ''
               )}
             </div>
           </div>
@@ -310,13 +323,15 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                 />
               </div>
             </div>
-            <div className="py-2 pr-2">
-              <MoreVertical
-                size={20}
-                className="text-teal-900 cursor-pointer hover:text-teal-600"
-                onClick={() => setIsDependenciesViewActive(true)}
-              />
-            </div>
+            {!crossBoardDependents && (
+              <div className="py-2 pr-2">
+                <MoreVertical
+                  size={20}
+                  className="text-teal-900 cursor-pointer hover:text-teal-600"
+                  onClick={() => setIsDependenciesViewActive(true)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

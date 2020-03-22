@@ -16,6 +16,7 @@ export interface IBoard {
 export interface INotification {
   type: string;
   id: number;
+  storyRequestId: number;
   sender: string;
   sprint: string;
   epic: string;
@@ -42,6 +43,7 @@ export interface IStory {
   id?: number;
   dependencies?: number[];
   crossBoardDependencies?: IStoryRequest[];
+  crossBoardDependents?: boolean;
   description?: string;
   home?: boolean;
   weight?: number;
