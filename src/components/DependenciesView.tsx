@@ -94,7 +94,7 @@ function DependenciesView() {
                     Sprint {s + 1}
                   </th>
                 ))}
-                <th className="w-1/5 inline-block">Backlog</th>
+                {data.maxSprint > 0 && <th className="w-1/5 inline-block">Backlog</th>}
               </tr>
             </thead>
             <tbody>
