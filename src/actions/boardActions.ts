@@ -193,13 +193,14 @@ export function withdrawStoryRequest(boardId: number, storyRequest: IStoryReques
 export function acceptOrRejectStoryRequest(
   boardId: number,
   requestId: number,
-  action: STORY_REQUEST_ACTION.Accept | STORY_REQUEST_ACTION.Reject
+  action: STORY_REQUEST_ACTION.Accept | STORY_REQUEST_ACTION.Reject,
+  notes: string
 ) {
   return {
     type: 'ACCEPT_STORY_REQUEST',
     callApi: () =>
       ApiService.post(`/board/${boardId}/request/${requestId}/${action.toLowerCase()}`, {
-        data: { notes: 'sfdsf' },
+        data: { notes },
       }),
     payload: { request: { data: { requestId } }, success: {} },
   } as const;

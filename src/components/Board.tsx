@@ -1,12 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useContext,
-  createContext,
-  useMemo,
-  useCallback,
-} from 'react';
+import React, { useEffect, useState, useRef, createContext, useMemo, useCallback } from 'react';
 import _ from 'lodash';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router';
@@ -356,10 +348,11 @@ function Board() {
 
   const handleAcceptOrRejectStoryRequest = (
     requestId: number,
-    action: STORY_REQUEST_ACTION.Accept | STORY_REQUEST_ACTION.Reject
+    action: STORY_REQUEST_ACTION.Accept | STORY_REQUEST_ACTION.Reject,
+    notes: string
   ) => {
     actions
-      .acceptOrRejectStoryRequest(id, requestId, action)
+      .acceptOrRejectStoryRequest(id, requestId, action, notes)
       .then(res => {
         toast.success('Success');
       })
@@ -391,6 +384,7 @@ function Board() {
   const { id: activeStoryId } = activeStory;
 
   const [isNotificationsActive, setIsNotificationsActive] = useState(false);
+  const [inputNotes, setInputNotes] = useState({});
 
   return (
     <BoardContext.Provider value={boardApi}>
@@ -489,29 +483,45 @@ function Board() {
                                   <div>{notes}</div>
                                 </div>
                               )}
-                              <div className="flex flex-row mt-2">
-                                <button
-                                  className="btn btn-minimal w-1/2 mr-2"
-                                  onClick={() =>
-                                    handleAcceptOrRejectStoryRequest(
-                                      storyRequestId,
-                                      STORY_REQUEST_ACTION.Reject
-                                    )
-                                  }
-                                >
-                                  Reject
-                                </button>
-                                <button
-                                  className="btn btn-primary w-1/2"
-                                  onClick={() =>
-                                    handleAcceptOrRejectStoryRequest(
-                                      storyRequestId,
-                                      STORY_REQUEST_ACTION.Accept
-                                    )
-                                  }
-                                >
-                                  Accept
-                                </button>
+                              <div className=" bg-teal-700 mt-2 p-2">
+                                <div>
+                                  <input
+                                    className="text-sm"
+                                    placeholder="Notes (eg Rejecting because...)"
+                                    onChange={e =>
+                                      setInputNotes({
+                                        ...inputNotes,
+                                        [storyRequestId]: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <div className="flex flex-row mt-2">
+                                  <button
+                                    className="btn btn-minimal text-sm w-1/2 mr-2"
+                                    onClick={() =>
+                                      handleAcceptOrRejectStoryRequest(
+                                        storyRequestId,
+                                        STORY_REQUEST_ACTION.Reject,
+                                        inputNotes[storyRequestId] || ''
+                                      )
+                                    }
+                                  >
+                                    Reject
+                                  </button>
+                                  <button
+                                    className="btn btn-primary py-1 text-sm w-1/2"
+                                    onClick={() =>
+                                      handleAcceptOrRejectStoryRequest(
+                                        storyRequestId,
+                                        STORY_REQUEST_ACTION.Accept,
+                                        inputNotes[storyRequestId] || ''
+                                      )
+                                    }
+                                  >
+                                    Accept
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           );
