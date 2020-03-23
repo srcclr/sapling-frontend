@@ -42,8 +42,24 @@ function DependenciesView() {
         const fromSprint = d.from.sprint || backlogId;
         const toSprint = d.to.sprint || backlogId;
         const key = getId(d.from.name, fromSprint);
-        const sourceAnchor: AnchorPosition = fromSprint > toSprint ? 'left' : 'right';
-        const targetAnchor: AnchorPosition = sourceAnchor === 'left' ? 'right' : 'left';
+        let sourceAnchor, targetAnchor: AnchorPosition;
+        if (fromSprint === toSprint) {
+          let fromI = teams.indexOf(d.from.name);
+          let toI = teams.indexOf(d.to.name);
+          if (fromI > toI) {
+            sourceAnchor = 'top';
+            targetAnchor = 'bottom';
+          } else {
+            sourceAnchor = 'bottom';
+            targetAnchor = 'top';
+          }
+        } else if (fromSprint > toSprint) {
+          sourceAnchor = 'left';
+          targetAnchor = 'right';
+        } else {
+          sourceAnchor = 'right';
+          targetAnchor = 'left';
+        }
         const rel = { targetId: getId(d.to.name, toSprint), targetAnchor, sourceAnchor };
         return { key, rel };
       }),
