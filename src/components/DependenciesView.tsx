@@ -46,6 +46,8 @@ function DependenciesView() {
         if (fromSprint === toSprint) {
           let fromI = teams.indexOf(d.from.name);
           let toI = teams.indexOf(d.to.name);
+          console.log(d.from.name);
+          console.log(d.to.name);
           if (fromI > toI) {
             sourceAnchor = 'top';
             targetAnchor = 'bottom';
@@ -68,52 +70,60 @@ function DependenciesView() {
     t => t.map(x => x.rel)
   );
 
-  const boxStyle = { padding: '10px', border: '1px solid black' };
-  const tdStyle = { padding: '40px' };
-
   return (
-    <div className="max-w-xl w-1/3 mx-auto pt-20 relative">
+    <div className="flex flex-col w-1/2 mx-auto pt-20 relative">
       <Link to="/boards" className="mb-2 flex flex-row items-center">
         <ChevronLeft size="14" /> Boards
       </Link>
       <h1 className="text-gray-700 font-bold text-xl">Dependencies</h1>
-
+      <div className="text-gray-600 py-4">
+        This shows the cross-team dependencies by sprints. Each arrow represents the dependency of 1
+        or more stories within a sprint to the stories in the same or another sprint across
+        different teams.
+      </div>
       {isFetching ? (
         <SquareSpinner className="mt-20" />
       ) : data ? (
         <ArcherContainer strokeColor={colors.teal[400]}>
-          <table className="table-auto">
+          <table className="table-auto w-full">
             <thead>
-              <tr>
-                <th />
+              <tr className="block">
+                <th className="w-1/5 inline-block" />
                 {_.range(data.maxSprint).map((s, i) => (
-                  <th key={s + i}>Sprint {s + 1}</th>
+                  <th key={s + i} className="w-1/5 inline-block">
+                    Sprint {s + 1}
+                  </th>
                 ))}
-                <th>Backlog</th>
+                <th className="w-1/5 inline-block">Backlog</th>
               </tr>
             </thead>
             <tbody>
               {teams.map((t, teamIndex) => (
-                <tr key={t + teamIndex}>
-                  <td>{t}</td>
-                  {_.range(data.maxSprint).map(s => (
-                    <td key={t + teamIndex + s} style={tdStyle}>
-                      <ArcherElement
-                        id={getId(t, s + 1)}
-                        relations={depsBySourceId[getId(t, s + 1)]}
+                <tr key={t + teamIndex} className="block mb-2 p-2 rounded-sm bg-gray-200">
+                  <td className="w-1/5 inline-block">{t}</td>
+                  {_.range(data.maxSprint).map(s => {
+                    const deps = depsBySourceId[getId(t, s + 1)];
+                    return (
+                      <td
+                        key={t + teamIndex + s}
+                        className="text-xs rounded-lg inline-block p-6 w-1/5 border-r-2 border-dashed"
                       >
-                        <div style={boxStyle}>
-                          {t} sprint {s + 1}
-                        </div>
-                      </ArcherElement>
-                    </td>
-                  ))}
-                  <td style={tdStyle}>
+                        <ArcherElement id={getId(t, s + 1)} relations={deps}>
+                          <div className="rounded-sm border-gray-300 border-2 p-4 bg-white">
+                            {t} sprint {s + 1}
+                          </div>
+                        </ArcherElement>
+                      </td>
+                    );
+                  })}
+                  <td className="text-sm inline-block rounded-lg w-1/5">
                     <ArcherElement
                       id={getId(t, backlogId)}
                       relations={depsBySourceId[getId(t, backlogId)]}
                     >
-                      <div style={boxStyle}>{t} backlog</div>
+                      <div className="rounded-sm border-gray-300 border-2 p-4 bg-white">
+                        {t} backlog
+                      </div>
                     </ArcherElement>
                   </td>
                 </tr>
