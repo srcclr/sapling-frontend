@@ -64,7 +64,6 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   const epicValue = getNumberValue(epic);
 
   const handleFormSubmit = values => {
-    event.preventDefault();
     delayedHandleEditStory({
       id,
       ...values,
