@@ -151,7 +151,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
           <div className="">
             <div className="">
               {!isActive ? (
-                <div className="flex-grow ">
+                <div className="flex-grow">
                   <DetailsView
                     description={defaultValues.description}
                     id={id}
@@ -165,7 +165,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                 <form
                   onSubmit={handleSubmit(handleFormSubmit)}
                   onChange={handleSubmit(handleFormSubmit)}
-                  className={`flex-grow ${isLoading ? 'opacity-50' : ''}`}
+                  className={`flex-grow`}
                 >
                   <div className="flex lg:flex-col md:flex-col sm:flex-col mb-2 ">
                     <textarea
