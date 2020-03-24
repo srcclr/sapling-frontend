@@ -206,6 +206,14 @@ textarea {
   animation-duration: 200ms;
 }
 
+.icon-parent .icon-child {
+  @apply hidden;
+}
+
+.icon-parent > input:focus + .icon-child {
+  @apply inline-block;
+}
+
 /** 
 * Spinner fanciness here
 */

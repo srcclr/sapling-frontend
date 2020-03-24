@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import classnames from 'classnames';
-import { Trash, Edit2, PlusSquare, XSquare } from 'react-feather';
+import { PlusSquare, XSquare, CornerDownLeft } from 'react-feather';
 import { useOnClickOutside } from 'hooks';
 import { SelectOption } from 'types';
 
@@ -172,6 +172,20 @@ export const Dropdown = ({
             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
           </svg>
         </div>
+      </div>
+    </div>
+  );
+};
+
+export const ReturnIconWrap: React.FunctionComponent<{ className?: string }> = ({
+  className,
+  children,
+}) => {
+  return (
+    <div className={`${className} relative icon-parent`}>
+      {children}{' '}
+      <div className="absolute icon-child top-0 right-0 rounded-lg bg-white border-b-2 border-l border-r  p-1">
+        <CornerDownLeft size="12" />
       </div>
     </div>
   );

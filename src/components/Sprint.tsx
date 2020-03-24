@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import { Trash } from 'react-feather';
 import Loader from 'react-loader-spinner';
+import { ReturnIconWrap } from 'styles/ThemeComponents';
 
 import { ISprint } from 'types';
 
@@ -39,36 +40,39 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
           <div className="tag mr-2">{id}</div>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          onChange={handleSubmit}
-          className="flex-grow"
-          key={`${id}${name}${capacity}${goal}`}
-        >
+        <form onSubmit={handleSubmit} onBlur={handleSubmit} className="flex-grow" key={`${id}`}>
           <div className="flex flex-row mb-2">
-            <input
-              className=" placeholder-gray-500 mr-2 minimal text-lg font-bold"
-              type="text"
-              name="sprintName"
-              placeholder="New sprint name"
-              defaultValue={name}
-            />
-            <input
-              className=" w-1/5 placeholder-gray-500 mr-2 minimal"
-              type="number"
-              name="capacity"
-              defaultValue={capacity}
-              placeholder="Capacity (eg. 10)"
-            />
+            <ReturnIconWrap className="w-full">
+              <input
+                className=" placeholder-gray-500 mr-2 minimal text-lg font-bold"
+                type="text"
+                name="sprintName"
+                placeholder="New sprint name"
+                defaultValue={name}
+              />
+            </ReturnIconWrap>
+
+            <ReturnIconWrap className="w-1/5">
+              <input
+                className="  placeholder-gray-500 mr-2 minimal"
+                type="number"
+                name="capacity"
+                defaultValue={capacity}
+                placeholder="Capacity (eg. 10)"
+              />
+            </ReturnIconWrap>
           </div>
           <div className="flex flex-row">
-            <input
-              className=" placeholder-gray-500 mr-2 minimal"
-              type="text"
-              name="goal"
-              placeholder="Goal"
-              defaultValue={goal}
-            />
+            <ReturnIconWrap className="w-full">
+              <input
+                className=" placeholder-gray-500 mr-2 minimal"
+                type="text"
+                name="goal"
+                placeholder="Goal"
+                defaultValue={goal || ''}
+              />
+            </ReturnIconWrap>
+            <button type="submit" className="hidden" />
           </div>
         </form>
         <div className="p-4 flex-grow-0">
