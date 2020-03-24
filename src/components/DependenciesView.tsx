@@ -70,16 +70,18 @@ function DependenciesView() {
     t => t.map(x => x.rel)
   );
 
+  const columnClass = '';
+
   return (
-    <div className="flex flex-col w-1/2 mx-auto pt-20 relative">
+    <div className="flex flex-col w-3/4 mx-auto pt-20 relative">
       <Link to="/boards" className="mb-2 flex flex-row items-center">
         <ChevronLeft size="14" /> Boards
       </Link>
-      <h1 className="text-gray-700 font-bold text-xl">Dependencies</h1>
+      <h1 className="text-gray-700 font-bold text-xl">Cross-Team Dependencies</h1>
       <div className="text-gray-600 py-4">
         This shows the cross-team dependencies by sprints. Each arrow represents the dependency of 1
-        or more stories within a sprint to the stories in the same or another sprint across
-        different teams.
+        or more stories from a team's sprint to the stories in the same or another sprint in another
+        team.
       </div>
       {isFetching ? (
         <SquareSpinner className="mt-20" />
@@ -87,42 +89,47 @@ function DependenciesView() {
         <ArcherContainer strokeColor={colors.teal[400]}>
           <table className="table-auto w-full">
             <thead>
-              <tr className="block">
-                <th className="w-1/5 inline-block" />
+              {/* <tr className="block">
+                <th className={`inline-block ${columnClass}`} />
                 {_.range(data.maxSprint).map((s, i) => (
-                  <th key={s + i} className="w-1/5 inline-block">
+                  <th key={s + i} className={`inline-block ${columnClass}`}>
                     Sprint {s + 1}
                   </th>
                 ))}
-                {data.maxSprint > 0 && <th className="w-1/5 inline-block">Backlog</th>}
-              </tr>
+                {data.maxSprint > 0 && <th className={`inline-block ${columnClass}`}>Backlog</th>}
+              </tr> */}
             </thead>
             <tbody>
               {teams.map((t, teamIndex) => (
-                <tr key={t + teamIndex} className="block mb-2 p-2 rounded-sm bg-gray-200">
-                  <td className="w-1/5 inline-block">{t}</td>
+                <tr
+                  key={t + teamIndex}
+                  className="block mb-2 p-2 rounded-sm bg-gray-200 flex items-center"
+                >
+                  <td className={`inline-block relative w-1/5 ${columnClass}`}>{t}</td>
                   {_.range(data.maxSprint).map(s => {
                     const deps = depsBySourceId[getId(t, s + 1)];
                     return (
                       <td
                         key={t + teamIndex + s}
-                        className="text-xs rounded-lg inline-block p-6 w-1/5 border-r-2 border-dashed"
+                        className={`text-xs rounded-lg inline-block p-6 ${columnClass}`}
                       >
                         <ArcherElement id={getId(t, s + 1)} relations={deps}>
-                          <div className="rounded-sm border-gray-300 border-2 p-4 bg-white">
-                            {t} sprint {s + 1}
+                          <div className="rounded-sm p-4 bg-white">
+                            {/* {t}{' '} */}
+                            <div className="p-2 bg-teal-700 text-white">Sprint {s + 1}</div>
                           </div>
                         </ArcherElement>
                       </td>
                     );
                   })}
-                  <td className="text-sm inline-block rounded-lg w-1/5">
+                  <td className={`text-sm inline-block rounded-lg ${columnClass}`}>
                     <ArcherElement
                       id={getId(t, backlogId)}
                       relations={depsBySourceId[getId(t, backlogId)]}
                     >
-                      <div className="rounded-sm border-gray-300 border-2 p-4 bg-white">
-                        {t} backlog
+                      <div className="rounded-sm p-4 bg-white">
+                        {/* {t} backlog           */}
+                        <div className="p-2 bg-teal-700 text-white">Backlog</div>
                       </div>
                     </ArcherElement>
                   </td>
