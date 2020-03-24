@@ -142,7 +142,7 @@ function Board() {
     });
   };
 
-  const handleCreateEpic = (epicName, priority) => {
+  const handleCreateEpic = (epicName = '', priority: number) => {
     actions.createEpic(id, epicName, priority);
   };
 
@@ -157,7 +157,7 @@ function Board() {
       });
   };
 
-  const handleEditStory = story => {
+  const handleEditStory = (story: IStory) => {
     actions.updateStory(id, story).catch(() => {
       toast.error('Error updating story');
     });
@@ -165,11 +165,8 @@ function Board() {
 
   const delayedHandleEditStory = _.debounce(story => handleEditStory(story), 1000);
 
-  const handleCreateStory = (description, weight) => {
-    // todo: hack to assign to the first epic in the list
-    if (epics.length > 0) {
-      actions.createStory(id, epics[0].id, description, weight);
-    }
+  const handleCreateStory = (description = '', weight: number, epicId: number) => {
+    actions.createStory(id, epicId, description, weight);
   };
 
   const handleSolve = () => {
