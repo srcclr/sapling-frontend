@@ -163,6 +163,9 @@ export const countsPhrase = (word = '', items = []) => {
     case 'story': {
       return `${count} stor${count === 1 ? 'y' : 'ies'}`;
     }
+    case 'notification': {
+      return `${count} notification${count === 1 ? '' : 's'}`;
+    }
   }
 };
 

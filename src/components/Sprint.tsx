@@ -34,7 +34,7 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
   };
 
   return (
-    <div className={` px-4 mb-4 pb-4 ${isLoading ? 'opacity-50' : ''}`}>
+    <div className={` px-4 mb-4 pb-4`}>
       <div className="flex flex-row items-center">
         <div>
           <div className="tag mr-2">{id}</div>

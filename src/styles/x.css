@@ -101,7 +101,7 @@ textarea {
 }
 
 .clickable {
-  @apply text-gray-400 cursor-pointer;
+  @apply text-gray-500 cursor-pointer;
 }
 
 .clickable:hover {
@@ -212,6 +212,10 @@ textarea {
 
 .icon-parent > input:focus + .icon-child {
   @apply inline-block;
+}
+
+.badge-sm {
+  font-size: 0.6rem;
 }
 
 /** 
