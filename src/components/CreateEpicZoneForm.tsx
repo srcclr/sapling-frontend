@@ -21,7 +21,7 @@ const CreateEpicZoneForm = ({
       <form onSubmit={handleSubmit}>
         <div className="">
           <input
-            className=" placeholder-gray-500 mr-2 mb-1"
+            className=" placeholder-gray-500 mr-2 mb-1 text-sm"
             type="text"
             name="epicName"
             placeholder="New epic name"
@@ -29,12 +29,12 @@ const CreateEpicZoneForm = ({
             required
           />
           <input
-            className=" placeholder-gray-500 mr-2 mb-1"
+            className=" placeholder-gray-500 mr-2 mb-1 text-sm"
             type="number"
             name="priority"
             placeholder="Priority"
           />{' '}
-          <button className="btn btn-primary mr-2 w-full" type="submit">
+          <button className="btn btn-primary mr-2 w-full text-sm" type="submit">
             Add
           </button>
         </div>

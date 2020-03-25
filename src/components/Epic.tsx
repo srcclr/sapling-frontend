@@ -23,7 +23,7 @@ const Epic: React.FunctionComponent<IEpic & IEpicProps> = ({
           <div className="text-sm pr-1">{name}</div>
           <div className="text-sm">{priority}</div>
         </div>
-        <div className="px-4 flex-grow-0">
+        <div className="px-2 flex-grow-0">
           <div className="h-8 w-8 flex flex-row items-center justify-center">
             {isLoading ? (
               <Loader type="Grid" width={13} height={13} />

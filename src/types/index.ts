@@ -84,10 +84,9 @@ interface Dep {
 }
 
 export interface ICrossDeps {
-  deps: { from: Dep, to: Dep }[];
+  deps: { from: Dep; to: Dep }[];
   maxSprint: number;
 }
-
 
 export interface IError {
   error?: {
@@ -127,4 +126,10 @@ export enum STORY_REQUEST_ACTION {
 export interface SelectOption {
   value: number | string;
   label: string;
+}
+
+export enum NAVIGATION_LINKS {
+  EPICS = 'EPICS',
+  NOTIFICATIONS = 'NOTIFICATIONS',
+  USERS = 'USERS',
 }

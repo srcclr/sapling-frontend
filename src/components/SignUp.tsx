@@ -83,7 +83,7 @@ function SignUp() {
             </div>
             <div className="md:w-2/3">
               <input
-                type="text"
+                type="password"
                 name="confirmPassword"
                 ref={register({
                   validate: value => value === watch('password'),

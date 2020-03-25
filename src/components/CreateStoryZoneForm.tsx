@@ -25,7 +25,7 @@ const CreateStoryZoneForm = ({
       <form onSubmit={handleSubmit}>
         <div className="">
           <input
-            className=" placeholder-gray-500 mr-2 mb-1"
+            className=" placeholder-gray-500 mr-2 mb-1 text-sm"
             type="text"
             name="description"
             placeholder="Description"
@@ -33,13 +33,13 @@ const CreateStoryZoneForm = ({
             required
           />
           <input
-            className="placeholder-gray-500 mr-2 mb-1"
+            className="placeholder-gray-500 mr-2 mb-1 text-sm"
             type="number"
             name="weight"
             placeholder="Weight"
           />{' '}
           <div className="relative">
-            <select className="" name="epic">
+            <select className="text-sm" name="epic">
               {epics &&
                 epics.map((epic, i) => {
                   const { id, name } = epic;
@@ -62,7 +62,7 @@ const CreateStoryZoneForm = ({
           </div>
         </div>
         <div className="mt-1">
-          <button className="btn btn-primary mr-2 w-full" type="submit">
+          <button className="btn btn-primary mr-2 w-full text-sm" type="submit">
             Add
           </button>
         </div>
