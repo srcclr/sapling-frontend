@@ -29,7 +29,7 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
     event.preventDefault();
     const sprintName = event.currentTarget.sprintName.value;
     const capacity = event.currentTarget.capacity.value || 0;
-    const goal = event.currentTarget.goal.value || 0;
+    const goal = event.currentTarget.goal.value || '';
     delayedEdit({ id, name: sprintName, capacity, goal } as ISprint);
   };
 
