@@ -133,3 +133,9 @@ export enum NAVIGATION_LINKS {
   NOTIFICATIONS = 'NOTIFICATIONS',
   USERS = 'USERS',
 }
+
+export interface ISignUpParams {
+  email: string;
+  name: string;
+  password: string;
+}

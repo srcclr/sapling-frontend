@@ -1,11 +1,7 @@
 import { Action, ActionCreatorsMapObject } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 
-import AuthService from 'utils/AuthService';
 import IStoreState from 'store/IStoreState';
-import { SESSION_ID_HASH_RE } from 'constants/index';
-import { IEmptyAction } from 'actions/sharedActions';
-
 import { updateMe, fetchMe } from 'actions/myActions';
 
 export function checkUserStatus(history) {
@@ -13,8 +9,8 @@ export function checkUserStatus(history) {
     const { location } = history;
     const { pathname, search } = location;
     const hash = window && window.location && window.location.hash;
+    const publicPathnames = ['/login', '/signup'];
 
-    const hashMatch = SESSION_ID_HASH_RE.exec(hash);
     // Perform a fetch of user profile to check if logged in
     dispatch(fetchMe())
       .then(res => {
@@ -37,7 +33,11 @@ export function checkUserStatus(history) {
         }
       })
       .catch(() => {
-        history.push('/login');
+        if (publicPathnames.includes(pathname)) {
+          history.push(pathname);
+        } else {
+          history.push('/login');
+        }
       });
   };
 }

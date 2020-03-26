@@ -5,6 +5,7 @@ import boardListState from './boardListState';
 import dependenciesViewState from './dependenciesViewState';
 import epicsListState from './epicsListState';
 import loginState from './loginState';
+import signUpState from './signUpState';
 import myState from './myState';
 import IStoreState from '../store/IStoreState';
 import { connectRouter } from 'connected-react-router';
@@ -18,6 +19,7 @@ const rootReducer = history =>
     dependenciesViewState,
     epicsListState,
     loginState,
+    signUpState,
     myState,
   });
 

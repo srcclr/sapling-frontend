@@ -54,6 +54,17 @@ export const getLoginErrorMessage = (errorObj: IError) => {
 
   return 'Unable to login. Please contact your admin.';
 };
+
+export const getSignUpErrorMessage = (errorObj: IError) => {
+  if (!errorObj || _.isEmpty(errorObj)) {
+    return null;
+  }
+
+  const { error = {} } = errorObj;
+  const { message } = error;
+
+  return message;
+};
 /**
  * This is a reducer for an async action
  * mainly to handle the REQUEST, SUCCESS and FAILURE states

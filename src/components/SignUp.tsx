@@ -1,17 +1,38 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import AuthService from 'utils/AuthService';
+import { toast } from 'react-toastify';
 
 import Loader from 'react-loader-spinner';
+import { useDispatch, useSelector } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { BoundActionsObjectMap } from 'actions/actionTypes';
+import { signUp } from 'actions/signUp';
+import { getSignUpErrorMessage } from 'utils/Helpers';
+import IStoreState, { ISignUpState } from 'store/IStoreState';
 
-// TODO
 function SignUp() {
-  const errorMessage = '';
-  const isSigningUp = false;
-
+  const signUpState = useSelector<IStoreState, ISignUpState>(state => state.signUpState);
   const { register, errors, handleSubmit, watch } = useForm();
+  const dispatch = useDispatch();
+  const actions = bindActionCreators<{}, BoundActionsObjectMap>({ signUp }, dispatch);
 
-  const onSubmit = values => {};
+  const onSubmit = values => {
+    const { email, name, password } = values;
+    actions.signUp({ email, name, password }).then(res => {
+      const { data } = res;
+      const { header } = data;
+      const { ['access_token']: authToken } = header;
+      if (authToken) {
+        AuthService.setAuthToken(authToken);
+        window.location = `/boards` as any;
+      }
+    });
+  };
+
+  const { error = {}, isSigningUp = false } = signUpState;
+  const errorMessage = getSignUpErrorMessage(error);
 
   return (
     <div className="flex items-stretch h-screen">
@@ -42,13 +63,36 @@ function SignUp() {
                 autoComplete={'username email'}
                 type="email"
                 className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-teal-500"
-                name="username"
+                name="email"
                 placeholder="Email"
                 ref={register({ required: true })}
                 autoFocus
               />
               <div className="text-sm text-red-300">
                 {errors && errors['username'] && errors['username']['type'] === 'required'
+                  ? 'Required'
+                  : ''}
+              </div>
+            </div>
+          </div>
+          <div className="md:flex md:items-center mb-6">
+            <div className="md:w-1/3">
+              <label className="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4">
+                Name
+              </label>
+            </div>
+            <div className="md:w-2/3">
+              <input
+                autoComplete={'name'}
+                type="text"
+                className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-teal-500"
+                name="name"
+                placeholder="Name"
+                ref={register({ required: true })}
+                autoFocus
+              />
+              <div className="text-sm text-red-300">
+                {errors && errors['name'] && errors['name']['type'] === 'required'
                   ? 'Required'
                   : ''}
               </div>

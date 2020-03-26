@@ -62,8 +62,9 @@ class ApiService implements IApiService {
               theToken = token;
             }
 
-            const isLoggingIn =
+            const isLoggingInOrRegistering =
               path.startsWith('/login') ||
+              path.startsWith('/register') ||
               (path.startsWith('http') && path.substr(path.lastIndexOf('/') + 1) === 'login');
 
             const isRetrievingUserStatus =
@@ -101,12 +102,12 @@ class ApiService implements IApiService {
                 }
 
                 reject(body || err);
-              } else if (isLoggingIn) {
+              } else if (isLoggingInOrRegistering) {
                 resolve(res);
               } else {
                 const { text = '' } = res;
 
-                if (isRetrievingUserStatus || isLoggingIn) {
+                if (isRetrievingUserStatus || isLoggingInOrRegistering) {
                   if (res.headers && res.headers[RESPONSE_TOKEN_HEADER]) {
                     // if the response contains an x-auth-token, we need to set (or reset) the session token cookie
                     const latestToken = res.headers[RESPONSE_TOKEN_HEADER];

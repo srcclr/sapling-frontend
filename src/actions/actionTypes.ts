@@ -5,6 +5,7 @@ type BoardListActionCreators = typeof import('./boardListActions');
 type EpicsActionCreators = typeof import('./epicsActions');
 type DependenciesViewActionCreators = typeof import('./dependenciesViewActions');
 type myActionCreators = typeof import('./myActions');
+type signUpActionCreators = typeof import('./signUp');
 
 type AsyncPayload<R, S> = {
   request: { data?: R };
@@ -31,7 +32,8 @@ type ActionCreators = LoginActionCreators &
   BoardActionCreators &
   EpicsActionCreators &
   DependenciesViewActionCreators &
-  myActionCreators;
+  myActionCreators &
+  signUpActionCreators;
 
 export type ActionMapObject = {
   [Name in keyof ActionCreators]: ActionCreators[Name] extends ((...args: any[]) => any)
