@@ -6,21 +6,26 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { ChevronLeft, X, ChevronRight } from 'react-feather';
-import config from 'utils/config';
 import moment from 'moment';
 import Loader from 'react-loader-spinner';
+import config from 'utils/config';
 
 import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
 import * as boardListActions from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
 
-import IStoreState, { IBoardState, IEpicsListState, IBoardListState } from 'store/IStoreState';
+import AuthService from 'utils/AuthService';
+
+import IStoreState, {
+  IBoardState,
+  IEpicsListState,
+  IBoardListState,
+  IMyState,
+} from 'store/IStoreState';
 import { SquareSpinner, Dialog } from 'styles/ThemeComponents';
 import CreateSprintZoneForm from 'components/CreateSprintZoneForm';
 import Sprint from 'components/Sprint';
-import Epic from 'components/Epic';
-import Story from 'components/Story';
 import DependencyModeModal from 'components/DependencyModeModal';
 import CreateEpicZoneForm from 'components/CreateEpicZoneForm';
 import CreateStoryZoneForm from 'components/CreateStoryZoneForm';
@@ -37,7 +42,6 @@ import {
   IStoryRequest,
   ICrossBoardData,
   IStory,
-  INotification,
   STORY_REQUEST_ACTION,
   NAVIGATION_LINKS,
 } from 'types';
@@ -51,6 +55,7 @@ interface StateSelector {
   boardListState?: IBoardListState;
   boardState?: IBoardState;
   epicsListState?: IEpicsListState;
+  myState?: IMyState;
 }
 
 export const BoardContext = createContext(null);
@@ -61,11 +66,15 @@ function Board() {
       boardListState: state.boardListState,
       boardState: state.boardState,
       epicsListState: state.epicsListState,
+      myState: state.myState,
     })) || {};
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
-  const { boardState, epicsListState, boardListState } = state;
+  const { boardState, epicsListState, boardListState, myState } = state;
+
+  const { firstName } = myState;
+
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, BoundActionsObjectMap>(
     { ...boardActions, ...epicsActions, ...boardListActions },
@@ -395,6 +404,12 @@ function Board() {
 
   const [expandSection, setExpandSection] = useState('');
 
+  const handleLogout = () => {
+    AuthService.logout().then(() => {
+      window.location = '/login' as any;
+    });
+  };
+
   return (
     <BoardContext.Provider value={boardApi}>
       <div className="w-full ">
@@ -420,7 +435,7 @@ function Board() {
                   <div className="mr-2 text-sm text-gray-600 mr-4 pr-4 border-r">
                     Last refreshed {moment(lastRefresh).fromNow(false)}
                   </div>
-                  <div className="flex flex-row">
+                  <div className="flex flex-row mr-2 mr-4 pr-4 border-r">
                     <input
                       type="file"
                       id="file"
@@ -453,6 +468,12 @@ function Board() {
                       disabled={!hasStoriesAndSprints}
                     >
                       Auto Arrange
+                    </button>
+                  </div>
+                  <div className="flex justify-end items-center">
+                    <div className="mr-2">{firstName}</div>{' '}
+                    <button className="btn btn-minimal text-xs" onClick={handleLogout}>
+                      Logout
                     </button>
                   </div>
                 </div>

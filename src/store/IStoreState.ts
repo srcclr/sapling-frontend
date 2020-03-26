@@ -91,10 +91,5 @@ export interface IMyState {
   firstName: string;
   id: number;
   lastName: string;
-  orgSlug: string;
-  researcher: boolean;
-  roles: string[];
-  username: string;
-  fetchResolved: boolean;
   isFetchingMe: boolean;
 }
