@@ -5,8 +5,7 @@ import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import configureStore, { history } from 'store/configureStore';
 import Root from './components/Root';
-import './styles/styles.scss';
-import './styles/x.css';
+import './styles/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
