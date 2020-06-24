@@ -46,8 +46,7 @@ function DependenciesView() {
         if (fromSprint === toSprint) {
           let fromI = teams.indexOf(d.from.name);
           let toI = teams.indexOf(d.to.name);
-          console.log(d.from.name);
-          console.log(d.to.name);
+
           if (fromI > toI) {
             sourceAnchor = 'top';
             targetAnchor = 'bottom';

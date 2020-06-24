@@ -154,7 +154,7 @@ textarea {
 }
 
 .story {
-  @apply mb-4 mr-4 h-48 max-w-sm w-64 relative overflow-hidden;
+  @apply mb-6 mr-6 h-48 border-2 max-w-sm w-64 relative overflow-hidden;
   transition: box-shadow 0.2s ease;
 }
 
@@ -263,6 +263,16 @@ textarea {
   -ms-animation: square-spinner-inner 2.3s infinite ease-in;
   -webkit-animation: square-spinner-inner 2.3s infinite ease-in;
   -moz-animation: square-spinner-inner 2.3s infinite ease-in;
+}
+
+.arrows-container > svg {
+  @apply z-10;
+  pointer-events: none;
+}
+
+.arrows-container.inactive > svg {
+  @apply hidden;
+  pointer-events: none;
 }
 
 @keyframes square-spinner {

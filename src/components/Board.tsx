@@ -1,6 +1,18 @@
-import React, { useEffect, useState, useRef, createContext, useMemo, useCallback } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  createContext,
+  useMemo,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
+import hash from 'object-hash';
+
 import _ from 'lodash';
 import { toast } from 'react-toastify';
+import { ArcherContainer } from 'react-archer';
+
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -35,6 +47,7 @@ import {
   getStoriesCountMap,
   hasStories,
   getLoadMap,
+  getStatsMap,
 } from 'utils/Helpers';
 import {
   ISprint,
@@ -50,6 +63,7 @@ import EpicsList from './EpicsList';
 import SprintStats from './SprintStats';
 import NotificationsList from './NotificationsList';
 import SideNavigation from './SideNavigation';
+import { useMultipleRects } from 'use-multiple-rects';
 
 interface StateSelector {
   boardListState?: IBoardListState;
@@ -129,9 +143,8 @@ function Board() {
     storyAsyncCallStateById = {},
   } = boardState;
   const { name, id, sprints = [], unassigned = [], notifications = [] } = board;
-  const storiesCountMap = getStoriesCountMap(sprints, unassigned);
+  const { storiesCountMap, loadMap, sprintStoryIds = [] } = getStatsMap(sprints, unassigned);
   const hasStoriesAndSprints = hasStories(storiesCountMap) && sprints && sprints.length > 0;
-  const loadMap = getLoadMap(sprints, unassigned);
 
   const handleCreateSprint = (sprint: ISprint) => {
     actions.createSprint(id, sprint);
@@ -202,6 +215,12 @@ function Board() {
   const handleAddingDependency = useCallback(story => {
     setDependencyMode(true);
     setActiveStory(story);
+    setActiveDepArrowsStory(story.id);
+  }, []);
+
+  const [activeDepArrowsStory, setActiveDepArrowsStory] = useState('');
+  const handleShowDependencyArrows = useCallback(storyId => {
+    setActiveDepArrowsStory(storyId);
   }, []);
 
   const handleDeleteDependency = (fromStoryId: number, toStoryId: number) => {
@@ -370,26 +389,6 @@ function Board() {
       });
   };
 
-  const boardApi = useMemo(
-    () => ({
-      delayedHandleEditStory,
-      handleAddingDependency,
-      handleAddAsDependency,
-      handleDeleteDependency,
-      dependencyMode,
-      handleDependencyBoardSelect,
-      handleSubmitStoryRequest,
-      handleDeleteStory,
-      handleWithdrawRequest,
-      isFetchingCrossBoardData,
-      crossBoardData,
-      boardList,
-      epics,
-      sprints,
-    }),
-    [dependencyMode, epics, sprints, crossBoardData, isFetchingCrossBoardData]
-  );
-
   const { id: activeStoryId } = activeStory;
 
   const [activeNavigationTab, setActiveNavigationTab] = useState(NAVIGATION_LINKS.EPICS);
@@ -409,6 +408,50 @@ function Board() {
       window.location = '/login' as any;
     });
   };
+
+  const [storyRefs, storyRects] = useMultipleRects({ ids: sprintStoryIds });
+
+  const boardApi = useMemo(
+    () => ({
+      delayedHandleEditStory,
+      handleAddingDependency,
+      handleShowDependencyArrows,
+      handleAddAsDependency,
+      handleDeleteDependency,
+      dependencyMode,
+      handleDependencyBoardSelect,
+      handleSubmitStoryRequest,
+      handleDeleteStory,
+      handleWithdrawRequest,
+      isFetchingCrossBoardData,
+      activeDepArrowsStory,
+      crossBoardData,
+      boardList,
+      epics,
+      sprints,
+      storyRefs,
+      storyRects,
+    }),
+    [
+      dependencyMode,
+      epics,
+      sprints,
+      crossBoardData,
+      isFetchingCrossBoardData,
+      storyRefs,
+      storyRects,
+      activeDepArrowsStory,
+    ]
+  );
+
+  useEffect(
+    () => {
+      console.log('storyRects');
+      console.log(storyRects);
+      console.log(storyRefs);
+    },
+    [hash(storyRects)]
+  );
 
   return (
     <BoardContext.Provider value={boardApi}>
@@ -481,7 +524,8 @@ function Board() {
               {/* End Header */}
 
               {/* Body */}
-              <div className="flex flex-row flex-grow overflow-hidden">
+
+              <div className="flex flex-row flex-grow overflow-scroll">
                 <SideNavigation
                   active={activeNavigationTab}
                   data={{ notificationsCount: notifications.length || 0 }}
@@ -545,9 +589,9 @@ function Board() {
                 )}
 
                 <div
-                  className={`${
+                  className={`flex flex-row bg-gray-100 ${
                     activeNavigationTab ? 'w-4/5' : 'w-full'
-                  } flex flex-row bg-gray-100`}
+                  }`}
                 >
                   <div
                     className={`${
@@ -561,45 +605,53 @@ function Board() {
                     {isSolving || isUploadingCsv ? (
                       <SquareSpinner className="mt-20" />
                     ) : (
-                      <div>
-                        {sprints && sprints.length > 0 ? (
-                          sprints.map((sprint, i) => {
-                            const { id: sprintId, tickets, capacity } = sprint;
-                            const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
-                            const { isLoading: isSprintLoading = false } = sprintCallState;
-                            const load = loadMap[sprintId];
-                            const loadLeft = capacity - load;
+                      <ArcherContainer
+                        strokeColor="red"
+                        className={`arrows-container ${!activeDepArrowsStory ? 'inactive' : ''}  `}
+                        strokeWidth={2}
+                        arrowLength={5}
+                        strokeDasharray="3"
+                      >
+                        <div>
+                          {sprints && sprints.length > 0 ? (
+                            sprints.map((sprint, i) => {
+                              const { id: sprintId, tickets, capacity } = sprint;
+                              const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
+                              const { isLoading: isSprintLoading = false } = sprintCallState;
+                              const load = loadMap[sprintId];
+                              const loadLeft = capacity - load;
 
-                            return (
-                              <Sprint
-                                key={i}
-                                {...sprint}
-                                onDelete={handleDeleteSprint}
-                                onEdit={handleEditSprint}
-                                isLoading={isSprintLoading}
-                              >
-                                <SprintStats
-                                  storiesCount={storiesCountMap[sprintId]}
-                                  currentLoadCount={load}
-                                  loadLeftCount={loadLeft}
-                                />
-                                <StoriesList
-                                  sprintId={sprintId}
-                                  stories={tickets}
-                                  activeStoryId={activeStoryId}
-                                  storyAsyncCallStateById={storyAsyncCallStateById}
-                                  emptyListMessage="No stories found in this sprint"
-                                />
-                              </Sprint>
-                            );
-                          })
-                        ) : (
-                          <div className="italic text-gray-500">No Sprints found</div>
-                        )}
-                        <div className="mt-4">
-                          <CreateSprintZoneForm onSubmit={handleCreateSprint} />
+                              return (
+                                <Sprint
+                                  key={i}
+                                  {...sprint}
+                                  onDelete={handleDeleteSprint}
+                                  onEdit={handleEditSprint}
+                                  isLoading={isSprintLoading}
+                                >
+                                  <SprintStats
+                                    storiesCount={storiesCountMap[sprintId]}
+                                    currentLoadCount={load}
+                                    loadLeftCount={loadLeft}
+                                  />
+                                  <StoriesList
+                                    sprintId={sprintId}
+                                    stories={tickets}
+                                    activeStoryId={activeStoryId}
+                                    storyAsyncCallStateById={storyAsyncCallStateById}
+                                    emptyListMessage="No stories found in this sprint"
+                                  />
+                                </Sprint>
+                              );
+                            })
+                          ) : (
+                            <div className="italic text-gray-500">No Sprints found</div>
+                          )}
+                          <div className="mt-4">
+                            <CreateSprintZoneForm onSubmit={handleCreateSprint} />
+                          </div>
                         </div>
-                      </div>
+                      </ArcherContainer>
                     )}
                   </div>
                   <div
@@ -628,29 +680,38 @@ function Board() {
                         <div className="text-xl">Backlog</div>
                         <span className="text-sm p-2">{countsPhrase('story', unassigned)}</span>
                       </div>
-                      <div className="flex-grow overflow-scroll pr-6">
-                        {epics && epics.length > 0 ? (
-                          <div>
-                            <div className="mb-4">
-                              <CreateStoryZoneForm onSubmit={handleCreateStory} epics={epics} />
+                      <ArcherContainer
+                        strokeColor="red"
+                        className={`arrows-container h-screen overflow-scroll inactive`}
+                        strokeWidth={2}
+                        arrowLength={5}
+                        strokeDasharray="3"
+                      >
+                        <div className="flex-grow overflow-scroll pr-6">
+                          {epics && epics.length > 0 ? (
+                            <div>
+                              <div className="mb-4">
+                                <CreateStoryZoneForm onSubmit={handleCreateStory} epics={epics} />
+                              </div>
+                              <StoriesList
+                                stories={unassigned}
+                                activeStoryId={activeStoryId}
+                                storyAsyncCallStateById={storyAsyncCallStateById}
+                                emptyListMessage="No backlog stories found"
+                              />
                             </div>
-                            <StoriesList
-                              stories={unassigned}
-                              activeStoryId={activeStoryId}
-                              storyAsyncCallStateById={storyAsyncCallStateById}
-                              emptyListMessage="No backlog stories found"
-                            />
-                          </div>
-                        ) : (
-                          <span className="italic text-gray-500">
-                            Create an Epic first to create stories
-                          </span>
-                        )}
-                      </div>
+                          ) : (
+                            <span className="italic text-gray-500">
+                              Create an Epic first to create stories
+                            </span>
+                          )}
+                        </div>
+                      </ArcherContainer>
                     </div>
                   </div>
                 </div>
               </div>
+
               {/* End Body */}
             </div>
           )}

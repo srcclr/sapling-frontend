@@ -218,6 +218,31 @@ export const getLoadMap = (sprints: ISprint[] = [], unassigned: IStory[] = []) =
   return loadMap;
 };
 
+export const getStatsMap = (sprints: ISprint[] = [], unassigned: IStory[] = []) => {
+  let loadMap = {};
+  let storiesCountMap = {};
+
+  let sprintStoryIds = [];
+  let allStoryIds = [];
+
+  sprints.forEach(sprint => {
+    loadMap[sprint.id] = getStoriesLoad(sprint.tickets);
+    storiesCountMap[sprint.id] = sprint.tickets.length;
+    sprintStoryIds = [...sprintStoryIds, ...sprint.tickets.map(t => t.id)];
+  });
+  loadMap['backlog'] = getStoriesLoad(unassigned);
+  storiesCountMap['backlog'] = unassigned.length;
+
+  allStoryIds = [...sprintStoryIds, ...unassigned.map(t => t.id)];
+
+  return {
+    loadMap,
+    storiesCountMap,
+    allStoryIds,
+    sprintStoryIds,
+  };
+};
+
 export const hasStories = storiesCountMap => {
   if (!storiesCountMap) {
     return false;
