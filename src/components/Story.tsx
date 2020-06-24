@@ -1,4 +1,4 @@
-import React, { useState, useContext, memo } from 'react';
+import React, { useState, useContext, createRef } from 'react';
 import _ from 'lodash';
 import { ArcherElement } from 'react-archer';
 import { IStory, STORY_REQUEST_ACTION, IStoryRequestWithViewData } from 'types';
@@ -58,8 +58,12 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     activeDepArrowsStory,
   } = board;
 
-  // For detecting outside clicks
-  const ref = storyRefs[id];
+  // storyRefs is an object containing all the refs returned by the useMultipleRects
+  // for purposes of tracking ticket DOM dimentions and positions. For now, we only do this for
+  // tickets under Sprints section, so expect that sotryRefs does not contain ticket Ids from Backlog.
+  // For Backlog tickets, we separately use createRef.
+  const ref = storyRefs[id] || createRef();
+
   useOnClickOutside(ref, () => {
     setIsActive(false);
     setIsDependenciesViewActive(false);
