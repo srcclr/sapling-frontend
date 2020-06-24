@@ -444,15 +444,6 @@ function Board() {
     ]
   );
 
-  useEffect(
-    () => {
-      console.log('storyRects');
-      console.log(storyRects);
-      console.log(storyRefs);
-    },
-    [hash(storyRects)]
-  );
-
   return (
     <BoardContext.Provider value={boardApi}>
       <div className="w-full ">
