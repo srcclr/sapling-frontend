@@ -57,6 +57,7 @@ import {
   IStory,
   STORY_REQUEST_ACTION,
   NAVIGATION_LINKS,
+  IStoryFilters,
 } from 'types';
 import StoriesList from './StoriesList';
 import EpicsList from './EpicsList';
@@ -409,6 +410,17 @@ function Board() {
     });
   };
 
+  const [activeStoryFilters, setActiveStoryFilters] = useState<IStoryFilters>({ epic: -1 });
+
+  const { epic: epicFilter } = activeStoryFilters;
+
+  const setEpicFilter = useCallback(epicId => {
+    setActiveStoryFilters({
+      ...activeStoryFilters,
+      epic: epicId || '',
+    });
+  }, []);
+
   const [storyRefs, storyRects] = useMultipleRects({ ids: sprintStoryIds });
 
   const boardApi = useMemo(
@@ -442,6 +454,13 @@ function Board() {
       storyRects,
       activeDepArrowsStory,
     ]
+  );
+
+  const sideNavigationData = useMemo(
+    () => ({
+      notificationsCount: notifications.length || 0,
+    }),
+    []
   );
 
   return (
@@ -519,7 +538,7 @@ function Board() {
               <div className="flex flex-row flex-grow overflow-scroll">
                 <SideNavigation
                   active={activeNavigationTab}
-                  data={{ notificationsCount: notifications.length || 0 }}
+                  data={sideNavigationData}
                   onChange={handleSetActiveNavigationTab}
                 />
                 {activeNavigationTab && (
@@ -580,124 +599,153 @@ function Board() {
                 )}
 
                 <div
-                  className={`flex flex-row bg-gray-100 ${
-                    activeNavigationTab ? 'w-4/5' : 'w-full'
-                  }`}
+                  className={`${activeNavigationTab ? 'w-4/5' : 'w-full'} flex-grow flex flex-col`}
                 >
-                  <div
-                    className={`${
-                      expandSection === 'BACKLOG' ? 'hidden' : 'visible'
-                    } flex-grow px-10 py-4 w-3/4 overflow-scroll flex flex-col bg-gray-100`}
-                  >
-                    <div className="flex flex-row items-center mb-3">
-                      <div className="text-xl">Sprints</div>
-                      <span className="text-sm p-2">{countsPhrase('sprint', sprints)}</span>
+                  <div className="flex-grow-0 border-b-2 border-white px-10 py-2 flex justify-start items-center bg-gray-100">
+                    <div className="text-xs mr-2">Highlight by epic</div>
+                    <div
+                      className={`pill ${epicFilter === -1 ? 'active' : ''}`}
+                      onClick={() => setEpicFilter(-1)}
+                    >
+                      All
                     </div>
-                    {isSolving || isUploadingCsv ? (
-                      <SquareSpinner className="mt-20" />
-                    ) : (
-                      <ArcherContainer
-                        strokeColor="red"
-                        className={`arrows-container ${!activeDepArrowsStory ? 'inactive' : ''}  `}
-                        strokeWidth={2}
-                        arrowLength={5}
-                        strokeDasharray="3"
-                      >
-                        <div>
-                          {sprints && sprints.length > 0 ? (
-                            sprints.map((sprint, i) => {
-                              const { id: sprintId, tickets, capacity } = sprint;
-                              const { [sprintId]: sprintCallState = {} } = sprintAsyncCallStateById;
-                              const { isLoading: isSprintLoading = false } = sprintCallState;
-                              const load = loadMap[sprintId];
-                              const loadLeft = capacity - load;
+                    {epics &&
+                      epics.length > 0 &&
+                      epics.map((epic, i) => {
+                        return (
+                          <div
+                            key={i}
+                            className={`pill ${epic.id === epicFilter ? 'active' : ''}`}
+                            onClick={() => setEpicFilter(epic.id)}
+                          >
+                            {epic.name}
+                          </div>
+                        );
+                      })}
+                  </div>
 
-                              return (
-                                <Sprint
-                                  key={i}
-                                  {...sprint}
-                                  onDelete={handleDeleteSprint}
-                                  onEdit={handleEditSprint}
-                                  isLoading={isSprintLoading}
-                                >
-                                  <SprintStats
-                                    storiesCount={storiesCountMap[sprintId]}
-                                    currentLoadCount={load}
-                                    loadLeftCount={loadLeft}
-                                  />
-                                  <StoriesList
-                                    sprintId={sprintId}
-                                    stories={tickets}
-                                    activeStoryId={activeStoryId}
-                                    storyAsyncCallStateById={storyAsyncCallStateById}
-                                    emptyListMessage="No stories found in this sprint"
-                                  />
-                                </Sprint>
-                              );
-                            })
-                          ) : (
-                            <div className="italic text-gray-500">No Sprints found</div>
-                          )}
-                          <div className="mt-4">
-                            <CreateSprintZoneForm onSubmit={handleCreateSprint} />
+                  <div className={`flex flex-row bg-gray-100 flex-grow overflow-hidden`}>
+                    <div
+                      className={`${
+                        expandSection === 'BACKLOG' ? 'hidden' : 'visible'
+                      } flex-grow px-10 py-4 w-3/4 overflow-scroll flex flex-col bg-gray-100`}
+                    >
+                      <div className="flex flex-row items-center mb-3">
+                        <div className="text-xl">Sprints</div>
+                        <span className="text-sm p-2">{countsPhrase('sprint', sprints)}</span>
+                      </div>
+                      {isSolving || isUploadingCsv ? (
+                        <SquareSpinner className="mt-20" />
+                      ) : (
+                        <ArcherContainer
+                          strokeColor="red"
+                          className={`arrows-container ${
+                            !activeDepArrowsStory ? 'inactive' : ''
+                          }  `}
+                          strokeWidth={2}
+                          arrowLength={5}
+                          strokeDasharray="3"
+                        >
+                          <div>
+                            {sprints && sprints.length > 0 ? (
+                              sprints.map((sprint, i) => {
+                                const { id: sprintId, tickets, capacity } = sprint;
+                                const {
+                                  [sprintId]: sprintCallState = {},
+                                } = sprintAsyncCallStateById;
+                                const { isLoading: isSprintLoading = false } = sprintCallState;
+                                const load = loadMap[sprintId];
+                                const loadLeft = capacity - load;
+
+                                return (
+                                  <Sprint
+                                    key={i}
+                                    {...sprint}
+                                    onDelete={handleDeleteSprint}
+                                    onEdit={handleEditSprint}
+                                    isLoading={isSprintLoading}
+                                  >
+                                    <SprintStats
+                                      storiesCount={storiesCountMap[sprintId]}
+                                      currentLoadCount={load}
+                                      loadLeftCount={loadLeft}
+                                    />
+                                    <StoriesList
+                                      sprintId={sprintId}
+                                      stories={tickets}
+                                      activeStoryId={activeStoryId}
+                                      storyAsyncCallStateById={storyAsyncCallStateById}
+                                      filters={activeStoryFilters}
+                                      emptyListMessage="No stories found in this sprint"
+                                    />
+                                  </Sprint>
+                                );
+                              })
+                            ) : (
+                              <div className="italic text-gray-500">No Sprints found</div>
+                            )}
+                            <div className="mt-4">
+                              <CreateSprintZoneForm onSubmit={handleCreateSprint} />
+                            </div>
+                          </div>
+                        </ArcherContainer>
+                      )}
+                    </div>
+                    <div
+                      className={`${
+                        expandSection === 'BACKLOG' ? 'w-full flex-grow' : 'w-1/4 flex-grow-0'
+                      }  overflow-scroll bg-gray-100 flex items-stretch `}
+                    >
+                      <div className="relative bg-gray-200 pl-6  w-full flex flex-col overflow-hidden">
+                        <div
+                          className="absolute top-0 left-0 pt-2 pb-2 bg-gray-400 cursor-pointer"
+                          onClick={
+                            expandSection !== 'BACKLOG'
+                              ? () => setExpandSection('BACKLOG')
+                              : () => setExpandSection('')
+                          }
+                        >
+                          <div>
+                            {expandSection !== 'BACKLOG' ? (
+                              <ChevronLeft size="14" className="clickable" />
+                            ) : (
+                              <ChevronRight size="14" className="clickable" />
+                            )}
                           </div>
                         </div>
-                      </ArcherContainer>
-                    )}
-                  </div>
-                  <div
-                    className={`${
-                      expandSection === 'BACKLOG' ? 'w-full flex-grow' : 'w-1/4 flex-grow-0'
-                    }  overflow-scroll bg-gray-100 flex items-stretch `}
-                  >
-                    <div className="relative bg-gray-200 pl-6  w-full flex flex-col overflow-hidden">
-                      <div
-                        className="absolute top-0 left-0 pt-2 pb-2 bg-gray-400 cursor-pointer"
-                        onClick={
-                          expandSection !== 'BACKLOG'
-                            ? () => setExpandSection('BACKLOG')
-                            : () => setExpandSection('')
-                        }
-                      >
-                        <div>
-                          {expandSection !== 'BACKLOG' ? (
-                            <ChevronLeft size="14" className="clickable" />
-                          ) : (
-                            <ChevronRight size="14" className="clickable" />
-                          )}
+                        <div className="flex-grow-0 flex flex-row items-center mb-3 mt-4">
+                          <div className="text-xl">Backlog</div>
+                          <span className="text-sm p-2">{countsPhrase('story', unassigned)}</span>
                         </div>
-                      </div>
-                      <div className="flex-grow-0 flex flex-row items-center mb-3 mt-4">
-                        <div className="text-xl">Backlog</div>
-                        <span className="text-sm p-2">{countsPhrase('story', unassigned)}</span>
-                      </div>
-                      <ArcherContainer
-                        strokeColor="red"
-                        className={`arrows-container h-screen overflow-scroll inactive`}
-                        strokeWidth={2}
-                        arrowLength={5}
-                        strokeDasharray="3"
-                      >
-                        <div className="flex-grow overflow-scroll pr-6">
-                          {epics && epics.length > 0 ? (
-                            <div>
-                              <div className="mb-4">
-                                <CreateStoryZoneForm onSubmit={handleCreateStory} epics={epics} />
+                        <ArcherContainer
+                          strokeColor="red"
+                          className={`arrows-container h-screen overflow-scroll inactive`}
+                          strokeWidth={2}
+                          arrowLength={5}
+                          strokeDasharray="3"
+                        >
+                          <div className="flex-grow overflow-scroll pr-6">
+                            {epics && epics.length > 0 ? (
+                              <div>
+                                <div className="mb-4">
+                                  <CreateStoryZoneForm onSubmit={handleCreateStory} epics={epics} />
+                                </div>
+                                <StoriesList
+                                  stories={unassigned}
+                                  activeStoryId={activeStoryId}
+                                  storyAsyncCallStateById={storyAsyncCallStateById}
+                                  filters={activeStoryFilters}
+                                  emptyListMessage="No backlog stories found"
+                                />
                               </div>
-                              <StoriesList
-                                stories={unassigned}
-                                activeStoryId={activeStoryId}
-                                storyAsyncCallStateById={storyAsyncCallStateById}
-                                emptyListMessage="No backlog stories found"
-                              />
-                            </div>
-                          ) : (
-                            <span className="italic text-gray-500">
-                              Create an Epic first to create stories
-                            </span>
-                          )}
-                        </div>
-                      </ArcherContainer>
+                            ) : (
+                              <span className="italic text-gray-500">
+                                Create an Epic first to create stories
+                              </span>
+                            )}
+                          </div>
+                        </ArcherContainer>
+                      </div>
                     </div>
                   </div>
                 </div>

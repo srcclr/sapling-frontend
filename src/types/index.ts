@@ -31,6 +31,10 @@ export interface IEpic {
   priority?: number;
 }
 
+export interface IStoryFilters {
+  epic: number;
+}
+
 export interface ISprint {
   id?: number;
   name?: string;
