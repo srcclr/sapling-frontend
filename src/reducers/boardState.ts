@@ -38,10 +38,7 @@ const boardListState = (state: IBoardState = initialState, action: Actions) =>
         return;
       }
       case 'FETCH_BOARD': {
-        asyncActionReducer(draft, action, ['isFetching'], () => {
-          const { data } = action.payload.success;
-          draft.data = data;
-        });
+        draft.data = action.payload;
         return;
       }
       case 'DELETE_BOARD': {

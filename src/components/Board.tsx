@@ -26,6 +26,7 @@ import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
 import * as boardListActions from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
+import { openedBoard, onBoardUpdate } from 'utils/WebSocketsService';
 
 import AuthService from 'utils/AuthService';
 
@@ -84,7 +85,6 @@ function Board() {
     })) || {};
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState(Date.now());
   const { boardState, epicsListState, boardListState, myState } = state;
 
   const { firstName } = myState;
@@ -96,31 +96,15 @@ function Board() {
   );
   const { boardId } = useParams();
 
+  onBoardUpdate(board => {
+    dispatch({ type: 'FETCH_BOARD', payload: board });
+  });
+
   useEffect(() => {
     refreshEpicsList();
-    refreshBoard();
     refreshBoardList();
-    const interval = setInterval(() => {
-      refreshEpicsList();
-      refreshBoard();
-      setLastRefresh(Date.now());
-    }, config.BOARD_REFRESH_RATE_MS || 5000);
-    return () => clearInterval(interval);
+    openedBoard(boardId);
   }, []);
-
-  const refreshBoard = () => {
-    if (!isNaN(parseInt(boardId))) {
-      actions
-        .fetchBoard(parseInt(boardId))
-        .then(() => {
-          setIsInitialLoad(false);
-        })
-        .catch(() => {
-          setIsInitialLoad(false);
-          toast.error('Error loading board');
-        });
-    }
-  };
 
   const refreshBoardList = () => {
     actions.fetchBoardList();
@@ -318,7 +302,6 @@ function Board() {
       .then(res => {
         toast.success('CSV uploaded successfully');
         refreshEpicsList();
-        refreshBoard();
       })
       .catch(() => {
         toast.error('Error uploading CSV');
@@ -466,9 +449,6 @@ function Board() {
                 </div>
 
                 <div className="flex flex-row items-center">
-                  <div className="mr-2 text-sm text-gray-600 mr-4 pr-4 border-r">
-                    Last refreshed {moment(lastRefresh).fromNow(false)}
-                  </div>
                   <div className="flex flex-row mr-2 mr-4 pr-4 border-r">
                     <input
                       type="file"

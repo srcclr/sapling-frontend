@@ -16,6 +16,7 @@ import DependenciesView from 'components/DependenciesView';
 import { checkUserStatus } from 'actions/appLoad';
 import Board from 'components/Board';
 import { SquareSpinner } from 'styles/ThemeComponents';
+import { connect } from 'utils/WebSocketsService';
 
 toast.configure({ hideProgressBar: true });
 
@@ -26,6 +27,7 @@ export function App() {
   const actions = bindActionCreators<{}, ActionCreatorsMapObject>({ checkUserStatus }, dispatch);
   useEffect(() => {
     actions.checkUserStatus(history);
+    connect();
   }, []);
 
   const { isFetchingMe = false } = myState;
