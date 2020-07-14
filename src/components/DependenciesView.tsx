@@ -10,6 +10,7 @@ import IStoreState, { IBoardListState, IMyState, IDependenciesViewState } from '
 import { SquareSpinner } from 'styles/ThemeComponents';
 import { ArcherContainer, ArcherElement, Relation, AnchorPosition } from 'react-archer';
 import { colors } from 'tailwindcss/defaultTheme';
+import { initWebSocketConnection } from 'utils/WebSocketsService';
 
 function DependenciesView() {
   const storeState = useSelector<IStoreState, { dependenciesViewState: IDependenciesViewState }>(
@@ -24,6 +25,7 @@ function DependenciesView() {
   const actions = bindActionCreators<{}, BoundActionsObjectMap>({ fetchDependencies }, dispatch);
 
   useEffect(() => {
+    initWebSocketConnection();
     actions.fetchDependencies();
   }, []);
 

@@ -26,7 +26,7 @@ import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
 import * as boardListActions from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
-import { openedBoard, onBoardUpdate } from 'utils/WebSocketsService';
+import { openedBoard, onBoardUpdate, initWebSocketConnection } from 'utils/WebSocketsService';
 
 import AuthService from 'utils/AuthService';
 
@@ -103,7 +103,7 @@ function Board() {
   useEffect(() => {
     refreshEpicsList();
     refreshBoardList();
-    openedBoard(boardId);
+    initWebSocketConnection().then(() => openedBoard(boardId));
   }, []);
 
   const refreshBoardList = () => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Trash, Edit2, ChevronRight } from 'react-feather';
 import { useForm } from 'react-hook-form';
@@ -14,6 +14,7 @@ import IStoreState, { IBoardListState, IMyState } from 'store/IStoreState';
 import { IBoard } from '../types';
 import { Dialog, SquareSpinner } from 'styles/ThemeComponents';
 import AuthService from 'utils/AuthService';
+import { initWebSocketConnection } from 'utils/WebSocketsService';
 
 function BoardList() {
   const { handleSubmit, register, reset, watch } = useForm();
@@ -71,6 +72,7 @@ function BoardList() {
   };
 
   useEffect(() => {
+    initWebSocketConnection();
     actions.fetchBoardList();
   }, []);
 

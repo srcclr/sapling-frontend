@@ -2,15 +2,38 @@ import config from './config';
 import AuthService from './AuthService';
 
 let socket;
+let identity;
 let boardUpdateCallback;
 
-function connect() {
+function send(message) {
+  socket.send(JSON.stringify(message));
+}
+
+function initWebSocketConnection() {
+  // This has to be idempotent because it's called from every page's useEffect.
+  // That is done because on hot reload, socket will be set to null, causing everything to break.
+  if (socket) {
+    return Promise.resolve();
+  }
+
   socket = new WebSocket(`${config.WS_URL}/ws`);
   socket.binaryType = 'arraybuffer';
 
-  socket.onopen = function(event) {
-    console.log('websocket connected');
-  };
+  let resolveQ;
+  const q = new Promise((resolve, _) => {
+    resolveQ = resolve;
+  });
+
+  const p = new Promise((resolve, _) => {
+    socket.onopen = function() {
+      resolve();
+    };
+  })
+    // synchronously register to get our identity, since we can't proceed without it
+    .then(() => {
+      send({ '@type': 'Register', please: {} });
+      return q;
+    });
 
   socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
@@ -18,20 +41,30 @@ function connect() {
       case 'Board':
         boardUpdateCallback(data.board);
         break;
+      case 'Welcome':
+        identity = data.uuid;
+        resolveQ();
+        break;
     }
   };
+
+  return p;
 }
 
-function send(message) {
-  socket.send(JSON.stringify(message));
-}
+// The socket is nulled when hot reloading, but the underlying connection persists.
+// We need to explicitly get rid of it.
+module.hot.dispose(_ => {
+  if (socket) {
+    socket.close();
+  }
+});
 
 function openedBoard(id) {
-  send({ '@type': 'OpenedBoard', board: id });
+  send({ '@type': 'OpenedBoard', board: id, uuid: identity });
 }
 
 function onBoardUpdate(f) {
   boardUpdateCallback = f;
 }
 
-export { onBoardUpdate, openedBoard, connect };
+export { onBoardUpdate, openedBoard, initWebSocketConnection };
