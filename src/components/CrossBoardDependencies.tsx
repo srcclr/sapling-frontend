@@ -52,7 +52,6 @@ const CrossBoardDependencies: React.FunctionComponent<{
     event.preventDefault();
     onSubmitRequest({ ...fieldValues, boardId });
   };
-
   return (
     <div>
       <Dropdown

@@ -14,7 +14,7 @@ export interface IBoard {
 }
 
 export interface INotification {
-  type: string;
+  type: NOTIFICATION_TYPE;
   id: number;
   storyRequestId: number;
   sender: string;
@@ -23,6 +23,14 @@ export interface INotification {
   description: string;
   points: number;
   notes: string;
+}
+
+export enum NOTIFICATION_TYPE {
+  INCOMING_STORY_REQUEST = "IncomingStoryRequest",
+  STORY_REQUEST_ACCEPTED = "StoryRequestAccepted",
+  STORY_REQUEST_REJECTED = "StoryRequestRejected",
+  STORY_REQUEST_WITHDRAWN = "StoryRequestWithdrawn",
+  STORY_REQUEST_RESUBMITTED = "StoryRequestResubmitted",
 }
 
 export interface IEpic {
