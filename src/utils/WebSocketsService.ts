@@ -43,6 +43,7 @@ if (module.hot) {
   module.hot.dispose(_ => {
     if (socket) {
       socket.close();
+      socket = null;
     }
   });
 }
