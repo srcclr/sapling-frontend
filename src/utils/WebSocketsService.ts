@@ -2,7 +2,7 @@ import config from './config';
 import AuthService from './AuthService';
 
 let socket;
-let boardUpdateCallback;
+let boardUpdateCallback, boardListUpdateCallback;
 let connected = false;
 
 function initWebSocketConnection() {
@@ -64,7 +64,7 @@ function isConnected() {
 // These are for indicating that certain pages have been accessed
 
 function openedBoard(id) {
-  send({ '@type': 'OpenedBoard', board: id });
+  send({ '@type': 'OpenedBoard', board: id, token: AuthService.getAuthToken() });
 }
 
 // And these are for acting on the messages which come in
