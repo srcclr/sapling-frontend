@@ -19,31 +19,17 @@ function initWebSocketConnection() {
   socket = new WebSocket(`${config.WS_URL}/ws`);
   socket.binaryType = 'arraybuffer';
 
-  let resolveQ;
-  const q = new Promise((resolve, _) => {
-    resolveQ = resolve;
-  });
-
   const p = new Promise((resolve, _) => {
     socket.onopen = function() {
       resolve();
     };
-  })
-    // synchronously register to get our identity, since we can't proceed without it
-    .then(() => {
-      send({ '@type': 'Register', please: {} });
-      return q;
-    });
+  });
 
   socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
     switch (data['@type']) {
       case 'Board':
         boardUpdateCallback(data.board);
-        break;
-      case 'Welcome':
-        identity = data.uuid;
-        resolveQ();
         break;
     }
   };
