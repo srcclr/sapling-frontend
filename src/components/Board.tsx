@@ -26,7 +26,7 @@ import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
 import * as boardListActions from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
-import { openedBoard, onBoardUpdate, initWebSocketConnection } from 'utils/WebSocketsService';
+import WebSockets from 'utils/WebSocketsService';
 
 import AuthService from 'utils/AuthService';
 
@@ -97,14 +97,14 @@ function Board() {
   );
   const { boardId } = useParams();
 
-  onBoardUpdate(board => {
+  WebSockets.onBoardUpdate(board => {
     dispatch({ type: 'FETCH_BOARD', payload: board });
   });
 
   useEffect(() => {
     refreshEpicsList();
     refreshBoardList();
-    initWebSocketConnection().then(() => openedBoard(boardId));
+    WebSockets.openedBoard(boardId);
   }, []);
 
   const refreshBoardList = () => {

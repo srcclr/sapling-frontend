@@ -14,7 +14,6 @@ import IStoreState, { IBoardListState, IMyState } from 'store/IStoreState';
 import { IBoard } from '../types';
 import { Dialog, SquareSpinner } from 'styles/ThemeComponents';
 import AuthService from 'utils/AuthService';
-import { initWebSocketConnection } from 'utils/WebSocketsService';
 
 function BoardList() {
   const { handleSubmit, register, reset, watch } = useForm();
@@ -72,7 +71,6 @@ function BoardList() {
   };
 
   useEffect(() => {
-    initWebSocketConnection();
     actions.fetchBoardList();
   }, []);
 

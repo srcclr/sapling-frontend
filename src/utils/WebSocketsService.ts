@@ -3,6 +3,7 @@ import AuthService from './AuthService';
 
 let socket;
 let boardUpdateCallback;
+let connected = false;
 
 function initWebSocketConnection() {
   // This has to be idempotent because it's called from every page's useEffect.
@@ -16,6 +17,7 @@ function initWebSocketConnection() {
 
   const p = new Promise((resolve, _) => {
     socket.onopen = function() {
+      connected = true;
       resolve();
     };
   });
@@ -29,10 +31,17 @@ function initWebSocketConnection() {
     }
   };
 
+  socket.onclose = function() {
+    // Try to reconnect
+    connected = false;
+    initWebSocketConnection();
+  };
+
   return p;
 }
 
 async function send(message) {
+  // Lazily initialize connection
   await initWebSocketConnection();
   socket.send(JSON.stringify(message));
 }
@@ -48,12 +57,20 @@ if (module.hot) {
   });
 }
 
+function isConnected() {
+  return connected;
+}
+
+// These are for indicating that certain pages have been accessed
+
 function openedBoard(id) {
   send({ '@type': 'OpenedBoard', board: id });
 }
+
+// And these are for acting on the messages which come in
 
 function onBoardUpdate(f) {
   boardUpdateCallback = f;
 }
 
-export { onBoardUpdate, openedBoard, initWebSocketConnection };
+export default { onBoardUpdate, openedBoard, isConnected };
