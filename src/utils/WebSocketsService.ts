@@ -39,11 +39,13 @@ function initWebSocketConnection() {
 
 // The socket is nulled when hot reloading, but the underlying connection persists.
 // We need to explicitly get rid of it.
-module.hot.dispose(_ => {
-  if (socket) {
-    socket.close();
-  }
-});
+if (module.hot) {
+  module.hot.dispose(_ => {
+    if (socket) {
+      socket.close();
+    }
+  });
+}
 
 function openedBoard(id) {
   send({ '@type': 'OpenedBoard', board: id });
