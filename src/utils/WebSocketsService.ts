@@ -19,31 +19,17 @@ function initWebSocketConnection() {
   socket = new WebSocket(`${config.WS_URL}/ws`);
   socket.binaryType = 'arraybuffer';
 
-  let resolveQ;
-  const q = new Promise((resolve, _) => {
-    resolveQ = resolve;
-  });
-
   const p = new Promise((resolve, _) => {
     socket.onopen = function() {
       resolve();
     };
-  })
-    // synchronously register to get our identity, since we can't proceed without it
-    .then(() => {
-      send({ '@type': 'Register', please: {} });
-      return q;
-    });
+  });
 
   socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
     switch (data['@type']) {
       case 'Board':
         boardUpdateCallback(data.board);
-        break;
-      case 'Welcome':
-        identity = data.uuid;
-        resolveQ();
         break;
     }
   };
@@ -53,14 +39,16 @@ function initWebSocketConnection() {
 
 // The socket is nulled when hot reloading, but the underlying connection persists.
 // We need to explicitly get rid of it.
-module.hot.dispose(_ => {
-  if (socket) {
-    socket.close();
-  }
-});
+if (module.hot) {
+  module.hot.dispose(_ => {
+    if (socket) {
+      socket.close();
+    }
+  });
+}
 
 function openedBoard(id) {
-  send({ '@type': 'OpenedBoard', board: id, uuid: identity });
+  send({ '@type': 'OpenedBoard', board: id });
 }
 
 function onBoardUpdate(f) {
