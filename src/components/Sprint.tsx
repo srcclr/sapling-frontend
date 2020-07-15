@@ -17,7 +17,6 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
   name,
   capacity,
   goal,
-  tickets = [],
   isLoading = false,
   onDelete,
   onEdit,
@@ -40,7 +39,12 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
           <div className="tag mr-2">{id}</div>
         </div>
 
-        <form onSubmit={handleSubmit} onBlur={handleSubmit} className="flex-grow" key={`${id}`}>
+        <form
+          onSubmit={handleSubmit}
+          onBlur={handleSubmit}
+          className="flex-grow"
+          key={`${id}-${name}-${capacity}-${goal}`}
+        >
           <div className="flex flex-row mb-2">
             <ReturnIconWrap className="w-full">
               <input
