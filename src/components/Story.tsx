@@ -16,6 +16,7 @@ interface IStoryProps {
   isLoading: boolean;
   sprintId?: number;
   isAddingDependency: boolean;
+  isDimmed?: boolean;
 }
 
 const Story: React.FunctionComponent<IStory & IStoryProps> = ({
@@ -31,6 +32,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   weight,
   isAddingDependency,
   isLoading,
+  isDimmed,
 }) => {
   const [isActive, setIsActive] = useState(false);
   const [isDependenciesViewActive, setIsDependenciesViewActive] = useState(false);
@@ -137,6 +139,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     'border-white': !isAddingDependency,
     'border-teal-200': isAddingDependency,
     'cursor-pointer hover:shadow-lg': isDependencyCandidate,
+    'opacity-25': isDimmed,
   });
 
   const detailsClassNames = classnames({

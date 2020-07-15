@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { NAVIGATION_LINKS } from 'types';
 import classnames from 'classnames';
 import { Bell, Zap, Users } from 'react-feather';
@@ -58,4 +58,4 @@ const SideNavigation: React.FunctionComponent<{
   );
 };
 
-export default SideNavigation;
+export default memo(SideNavigation);

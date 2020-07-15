@@ -156,6 +156,7 @@ textarea {
 .story {
   @apply mb-6 mr-6 h-48 border-2 max-w-sm w-64 relative overflow-hidden;
   transition: box-shadow 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .story.active {
@@ -192,6 +193,18 @@ textarea {
 .story .inner-plain {
   @apply h-32 w-full bg-white h-32;
   transition: height 0.2s ease;
+}
+
+.pill {
+  @apply text-xs rounded-full bg-gray-200 py-1 px-2 mr-1 inline-block text-gray-800 cursor-pointer border-b-2;
+}
+
+.pill.active {
+  @apply bg-teal-400 text-white;
+}
+
+.pill:hover {
+  @apply border-b-2 border-teal-200;
 }
 
 .animation-fade-in {
