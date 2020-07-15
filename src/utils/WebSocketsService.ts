@@ -46,7 +46,7 @@ module.hot.dispose(_ => {
 });
 
 function openedBoard(id) {
-  send({ '@type': 'OpenedBoard', board: id, uuid: identity });
+  send({ '@type': 'OpenedBoard', board: id });
 }
 
 function onBoardUpdate(f) {
