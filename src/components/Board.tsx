@@ -103,13 +103,8 @@ function Board() {
 
   useEffect(() => {
     refreshEpicsList();
-    refreshBoardList();
     WebSockets.openedBoard(boardId);
   }, []);
-
-  const refreshBoardList = () => {
-    actions.fetchBoardList();
-  };
 
   const refreshEpicsList = () => {
     if (!isNaN(parseInt(boardId))) {

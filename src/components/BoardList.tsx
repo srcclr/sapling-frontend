@@ -8,12 +8,13 @@ import { Trash, Edit2, ChevronRight } from 'react-feather';
 import { useForm } from 'react-hook-form';
 
 import { deleteBoard } from 'actions/boardActions';
-import { fetchBoardList, createBoard } from 'actions/boardListActions';
+import { createBoard } from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
 import IStoreState, { IBoardListState, IMyState } from 'store/IStoreState';
 import { IBoard } from '../types';
 import { Dialog, SquareSpinner } from 'styles/ThemeComponents';
 import AuthService from 'utils/AuthService';
+import WebSockets from 'utils/WebSocketsService';
 
 function BoardList() {
   const { handleSubmit, register, reset, watch } = useForm();
@@ -30,7 +31,7 @@ function BoardList() {
 
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, BoundActionsObjectMap>(
-    { fetchBoardList, createBoard, deleteBoard },
+    { createBoard, deleteBoard },
     dispatch
   );
 
@@ -47,7 +48,6 @@ function BoardList() {
           pauseOnHover: true,
           draggable: true,
         });
-        actions.fetchBoardList();
         reset();
       })
       .catch(() => {
@@ -66,13 +66,15 @@ function BoardList() {
     const { id: boardId } = boardToDelete;
     actions.deleteBoard(boardId).then(() => {
       toast.info('Deleted successfully');
-      actions.fetchBoardList();
     });
   };
 
   useEffect(() => {
-    actions.fetchBoardList();
+    WebSockets.openedBoardList();
   }, []);
+  WebSockets.onBoardListUpdate(boards => {
+    dispatch({ type: 'FETCH_BOARD_LIST', payload: { success: { data: boards } } });
+  });
 
   const { isFetching, data: boards = [] } = boardListState;
 

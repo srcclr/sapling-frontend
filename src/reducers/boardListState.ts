@@ -14,10 +14,8 @@ const boardListState = (state: IBoardListState = initialState, action: Actions) 
   produce(state, draft => {
     switch (action.type) {
       case 'FETCH_BOARD_LIST': {
-        asyncActionReducer(draft, action, ['isFetching'], () => {
-          const { data } = action.payload.success;
-          draft.data = data;
-        });
+        const { data } = action.payload.success;
+        draft.data = data;
         return;
       }
       case 'CREATE_BOARD': {

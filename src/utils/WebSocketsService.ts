@@ -28,6 +28,9 @@ function initWebSocketConnection() {
       case 'Board':
         boardUpdateCallback(data.board);
         break;
+      case 'BoardList':
+        boardListUpdateCallback(data.boards);
+        break;
     }
   };
 
@@ -67,10 +70,18 @@ function openedBoard(id) {
   send({ '@type': 'OpenedBoard', board: id, token: AuthService.getAuthToken() });
 }
 
+function openedBoardList() {
+  send({ '@type': 'OpenedBoardList', token: AuthService.getAuthToken() });
+}
+
 // And these are for acting on the messages which come in
 
 function onBoardUpdate(f) {
   boardUpdateCallback = f;
 }
 
-export default { onBoardUpdate, openedBoard, isConnected };
+function onBoardListUpdate(f) {
+  boardListUpdateCallback = f;
+}
+
+export default { onBoardUpdate, onBoardListUpdate, openedBoard, openedBoardList, isConnected };
