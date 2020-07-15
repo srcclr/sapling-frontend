@@ -2,12 +2,7 @@ import config from './config';
 import AuthService from './AuthService';
 
 let socket;
-let identity;
 let boardUpdateCallback;
-
-function send(message) {
-  socket.send(JSON.stringify(message));
-}
 
 function initWebSocketConnection() {
   // This has to be idempotent because it's called from every page's useEffect.
@@ -35,6 +30,11 @@ function initWebSocketConnection() {
   };
 
   return p;
+}
+
+async function send(message) {
+  await initWebSocketConnection();
+  socket.send(JSON.stringify(message));
 }
 
 // The socket is nulled when hot reloading, but the underlying connection persists.
