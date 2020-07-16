@@ -20,7 +20,7 @@ import WebSocketsService from 'utils/WebSocketsService';
 
 toast.configure({ hideProgressBar: true });
 
-const messageToActionTypeMap = {
+const messageTypeToActionTypeMap = {
   Board: 'OPENED_BOARD',
   BoardList: 'OPENED_BOARD_LIST',
 };
@@ -39,15 +39,14 @@ export function App() {
 
   const onMessageCallback = event => {
     const data = JSON.parse(event.data);
-    const type = messageToActionTypeMap[data['@type']];
-    console.log('RECEIVING');
+    const type = messageTypeToActionTypeMap[data['@type']];
     dispatch(createReceiveWsAction(type, data));
   };
 
   useEffect(() => {
-    console.log('1111');
     actions.checkUserStatus(history).then(() => {
-      WebSocketsService.initWebSocketConnection(onMessageCallback);
+      WebSocketsService.initWebSocketConnection();
+      WebSocketsService.handleMessage(onMessageCallback);
     });
   }, []);
 

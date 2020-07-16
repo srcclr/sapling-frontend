@@ -70,13 +70,8 @@ function BoardList() {
   };
 
   useEffect(() => {
-    // WebSockets.openedBoardList();
-    console.log('2222');
     actions.openedBoardList(AuthService.getAuthToken());
   }, []);
-  // WebSockets.onBoardListUpdate(boards => {
-  //   dispatch({ type: 'FETCH_BOARD_LIST', payload: { success: { data: boards } } });
-  // });
 
   const { isFetching, data: boards = [] } = boardListState;
 

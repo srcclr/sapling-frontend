@@ -5,7 +5,6 @@ import WebSocketsService from './WebSocketsService';
 // and tweaked
 export const actionsMiddleware = ({ dispatch }) => next => action => {
   const { type, callApi, message, payload = {} } = action;
-  console.log(action);
 
   if (!callApi && !message) {
     // Normal action: pass it on
