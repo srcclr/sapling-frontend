@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {INotification, NOTIFICATION_TYPE, STORY_REQUEST_ACTION} from 'types';
+import React, { useState } from 'react';
+import { INotification, NOTIFICATION_TYPE, STORY_REQUEST_ACTION } from 'types';
 
 const NotificationsList: React.FunctionComponent<{
   notifications: INotification[];
@@ -123,7 +123,7 @@ const NotificationsList: React.FunctionComponent<{
           );
         })
       ) : (
-      <div className="italic text-teal-600 text-sm">No new notifications</div>
+        <div className="italic text-teal-600 text-sm">No new notifications</div>
       )}
     </>
   );

@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
-import {IBoard, ICrossBoardData} from 'types';
-import {hasEmptyOption} from 'utils/Helpers';
-import {Dropdown} from 'styles/ThemeComponents';
+import React, { useState } from 'react';
+import { IBoard, ICrossBoardData } from 'types';
+import { hasEmptyOption } from 'utils/Helpers';
+import { Dropdown } from 'styles/ThemeComponents';
 import Loader from 'react-loader-spinner';
 
 const CrossBoardDependencies: React.FunctionComponent<{
@@ -12,7 +12,7 @@ const CrossBoardDependencies: React.FunctionComponent<{
   isFetching: boolean;
   onSubmitRequest: Function;
 }> = ({currentBoardId, boardList = [], onBoardSelect, data = {}, isFetching, onSubmitRequest, children}) => {
-  const {sprints = [], epics = [], boardId} = data;
+  const { sprints = [], epics = [], boardId } = data;
 
   const handleBoardSelect = (field, value) => {
     onBoardSelect(value);
@@ -29,7 +29,7 @@ const CrossBoardDependencies: React.FunctionComponent<{
     });
 
   const epicOptions = epics.map(epic => {
-    const {id, name} = epic;
+    const { id, name } = epic;
     return {
       value: id,
       label: name,
@@ -46,14 +46,14 @@ const CrossBoardDependencies: React.FunctionComponent<{
 
   const [fieldValues, setFieldValues] = useState({});
   const handleFieldChange = (name, value) => {
-    setFieldValues({...fieldValues, [name]: value});
+    setFieldValues({ ...fieldValues, [name]: value });
   };
 
   const hasEpicsAndSprints = epicOptions.length && sprintOptions.length;
 
   const handleSubmit = event => {
     event.preventDefault();
-    onSubmitRequest({...fieldValues, boardId});
+    onSubmitRequest({ ...fieldValues, boardId });
   };
   return (
     <div>
@@ -64,7 +64,7 @@ const CrossBoardDependencies: React.FunctionComponent<{
       />
       {isFetching ? (
         <div className="flex justify-center">
-          <Loader type="ThreeDots" color="#aaaaaa" width={20} height={20}/>
+          <Loader type="ThreeDots" color="#aaaaaa" width={20} height={20} />
         </div>
       ) : boardId && hasEpicsAndSprints ? (
         <div>
