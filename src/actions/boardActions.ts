@@ -206,6 +206,18 @@ export function acceptOrRejectStoryRequest(
   } as const;
 }
 
+export function acknowledgeNotification(
+  boardId: number,
+  notificationId: number
+) {
+  return {
+    type: 'ACKNOWLEDGE_NOTIFICATION',
+    callApi: () =>
+      ApiService.post(`/boards/${boardId}/notifications/${notificationId}/acknowledge`),
+    payload: { request: { data: {} }, success: {} },
+  } as const;
+}
+
 // This is just a workaround and needs revision because this is a duplicate of FETCH_BOARD action
 // Requires endpoint to return epics and sprints by board Id
 // Use case for this now is to retrieve epic and sprints to select for interboard dependency
