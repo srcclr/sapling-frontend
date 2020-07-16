@@ -29,7 +29,7 @@ const NotificationsList: React.FunctionComponent<{
           } = notification;
           let isAcknowledgement = true;
           let notificationDescription;
-          switch (notification["@type"]) {
+          switch (notification.type) {
             case NOTIFICATION_TYPE.STORY_REQUEST_RESUBMITTED:
             case NOTIFICATION_TYPE.INCOMING_STORY_REQUEST:
               notificationDescription = <div className="text-sm">
