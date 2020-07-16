@@ -45,8 +45,8 @@ export function App() {
 
   useEffect(() => {
     actions.checkUserStatus(history).then(() => {
-      WebSocketsService.initWebSocketConnection();
       WebSocketsService.handleMessage(onMessageCallback);
+      WebSocketsService.initWebSocketConnection();
     });
   }, []);
 
