@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
-import { IBoard, ICrossBoardData } from 'types';
-import { hasEmptyOption } from 'utils/Helpers';
-import { Dropdown } from 'styles/ThemeComponents';
+import React, {useState} from 'react';
+import {IBoard, ICrossBoardData} from 'types';
+import {hasEmptyOption} from 'utils/Helpers';
+import {Dropdown} from 'styles/ThemeComponents';
 import Loader from 'react-loader-spinner';
 
 const CrossBoardDependencies: React.FunctionComponent<{
+  currentBoardId: number;
   boardList: IBoard[];
   onBoardSelect: Function;
   data: ICrossBoardData;
   isFetching: boolean;
   onSubmitRequest: Function;
-}> = ({ boardList = [], onBoardSelect, data = {}, isFetching, onSubmitRequest, children }) => {
-  const { sprints = [], epics = [], boardId } = data;
+}> = ({currentBoardId, boardList = [], onBoardSelect, data = {}, isFetching, onSubmitRequest, children}) => {
+  const {sprints = [], epics = [], boardId} = data;
 
   const handleBoardSelect = (field, value) => {
     onBoardSelect(value);
   };
 
-  const boardListOptions = boardList.map(board => {
-    const { id, name } = board;
-    return {
-      value: id,
-      label: name,
-    };
-  });
+  const boardListOptions = boardList
+    .filter(board => board.id != currentBoardId)
+    .map(board => {
+      const {id, name} = board;
+      return {
+        value: id,
+        label: name,
+      };
+    });
 
   const epicOptions = epics.map(epic => {
-    const { id, name } = epic;
+    const {id, name} = epic;
     return {
       value: id,
       label: name,
@@ -34,7 +37,7 @@ const CrossBoardDependencies: React.FunctionComponent<{
   });
 
   const sprintOptions = sprints.map(sprint => {
-    const { id, name } = sprint;
+    const {id, name} = sprint;
     return {
       value: id,
       label: name,
@@ -43,14 +46,14 @@ const CrossBoardDependencies: React.FunctionComponent<{
 
   const [fieldValues, setFieldValues] = useState({});
   const handleFieldChange = (name, value) => {
-    setFieldValues({ ...fieldValues, [name]: value });
+    setFieldValues({...fieldValues, [name]: value});
   };
 
   const hasEpicsAndSprints = epicOptions.length && sprintOptions.length;
 
   const handleSubmit = event => {
     event.preventDefault();
-    onSubmitRequest({ ...fieldValues, boardId });
+    onSubmitRequest({...fieldValues, boardId});
   };
   return (
     <div>
@@ -61,7 +64,7 @@ const CrossBoardDependencies: React.FunctionComponent<{
       />
       {isFetching ? (
         <div className="flex justify-center">
-          <Loader type="ThreeDots" color="#aaaaaa" width={20} height={20} />
+          <Loader type="ThreeDots" color="#aaaaaa" width={20} height={20}/>
         </div>
       ) : boardId && hasEpicsAndSprints ? (
         <div>

@@ -38,6 +38,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   const board = useContext(BoardContext);
 
   const {
+    currentBoardId,
     delayedHandleEditStory,
     handleAddingDependency,
     handleAddAsDependency,
@@ -212,7 +213,6 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
         };
       })) ||
     [];
-
   return (
     <div
       className={`story ${storyClassNames}`}
@@ -441,6 +441,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                 <div className="mt-2 text-xs cross w-full">
                   <div className="font-semibold mb-2">Cross Board Dependencies</div>
                   <CrossBoardDependencies
+                    currentBoardId = {currentBoardId}
                     boardList={boardList}
                     onBoardSelect={handleDependencyBoardSelect}
                     data={crossBoardData}

@@ -423,9 +423,10 @@ function Board() {
   };
 
   const [storyRefs, storyRects] = useMultipleRects({ ids: sprintStoryIds });
-
+  const currentBoardId = id;
   const boardApi = useMemo(
     () => ({
+      currentBoardId,
       delayedHandleEditStory,
       handleAddingDependency,
       handleShowDependencyArrows,
