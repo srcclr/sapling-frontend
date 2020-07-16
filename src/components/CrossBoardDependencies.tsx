@@ -37,7 +37,7 @@ const CrossBoardDependencies: React.FunctionComponent<{
   });
 
   const sprintOptions = sprints.map(sprint => {
-    const {id, name} = sprint;
+    const { id, name } = sprint;
     return {
       value: id,
       label: name,
