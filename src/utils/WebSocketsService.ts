@@ -5,83 +5,56 @@ let socket;
 let boardUpdateCallback, boardListUpdateCallback;
 let connected = false;
 
-function initWebSocketConnection() {
-  // This has to be idempotent because it's called from every page's useEffect.
-  // That is done because on hot reload, socket will be set to null, causing everything to break.
-  if (socket) {
-    return Promise.resolve();
-  }
-
+function initWebSocketConnection(onMessageCallback) {
+  console.log(socket ? socket.readyState : '');
   socket = new WebSocket(`${config.WS_URL}/ws`);
   socket.binaryType = 'arraybuffer';
 
-  const p = new Promise((resolve, _) => {
-    socket.onopen = function() {
-      connected = true;
-      resolve();
-    };
-  });
+  socket.onopen = function() {
+    console.log(socket ? socket.readyState : '');
 
-  socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    switch (data['@type']) {
-      case 'Board':
-        boardUpdateCallback(data.board);
-        break;
-      case 'BoardList':
-        boardListUpdateCallback(data.boards);
-        break;
-    }
+    connected = true;
   };
+  console.log(socket ? socket.readyState : '');
+
+  socket.onmessage = onMessageCallback;
 
   socket.onclose = function() {
     // Try to reconnect
+    console.log(socket ? socket.readyState : '');
+    socket.close();
     connected = false;
-    initWebSocketConnection();
+    initWebSocketConnection(onMessageCallback);
   };
-
-  return p;
 }
 
-async function send(message) {
+function send(message) {
   // Lazily initialize connection
-  await initWebSocketConnection();
-  socket.send(JSON.stringify(message));
+  // await initWebSocketConnection();
+  if (socket && socket.readyState === 1) {
+    socket.send(JSON.stringify(message));
+  }
 }
 
-// The socket is nulled when hot reloading, but the underlying connection persists.
-// We need to explicitly get rid of it.
-if (module.hot) {
-  module.hot.dispose(_ => {
-    if (socket) {
-      socket.close();
-      socket = null;
-    }
-  });
-}
+// // The socket is nulled when hot reloading, but the underlying connection persists.
+// // We need to explicitly get rid of it.
+// if (module.hot) {
+//   module.hot.dispose(_ => {
+//     if (socket) {
+//       socket.close();
+//       socket = null;
+//     }
+//   });
+// }
 
 function isConnected() {
   return connected;
 }
 
-// These are for indicating that certain pages have been accessed
-
-function openedBoard(id) {
-  send({ '@type': 'OpenedBoard', board: id, token: AuthService.getAuthToken() });
-}
-
-function openedBoardList() {
-  send({ '@type': 'OpenedBoardList', token: AuthService.getAuthToken() });
-}
-
 // And these are for acting on the messages which come in
 
-function onBoardUpdate(f) {
-  boardUpdateCallback = f;
-}
-
-function onBoardListUpdate(f) {
-  boardListUpdateCallback = f;
-}
-
-export default { onBoardUpdate, onBoardListUpdate, openedBoard, openedBoardList, isConnected };
+export default {
+  initWebSocketConnection,
+  isConnected,
+  send,
+};

@@ -8,7 +8,7 @@ import { Trash, Edit2, ChevronRight } from 'react-feather';
 import { useForm } from 'react-hook-form';
 
 import { deleteBoard } from 'actions/boardActions';
-import { createBoard } from 'actions/boardListActions';
+import { createBoard, openedBoardList } from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
 import IStoreState, { IBoardListState, IMyState } from 'store/IStoreState';
 import { IBoard } from '../types';
@@ -31,7 +31,7 @@ function BoardList() {
 
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, BoundActionsObjectMap>(
-    { createBoard, deleteBoard },
+    { createBoard, deleteBoard, openedBoardList },
     dispatch
   );
 
@@ -70,11 +70,13 @@ function BoardList() {
   };
 
   useEffect(() => {
-    WebSockets.openedBoardList();
+    // WebSockets.openedBoardList();
+    console.log('2222');
+    actions.openedBoardList(AuthService.getAuthToken());
   }, []);
-  WebSockets.onBoardListUpdate(boards => {
-    dispatch({ type: 'FETCH_BOARD_LIST', payload: { success: { data: boards } } });
-  });
+  // WebSockets.onBoardListUpdate(boards => {
+  //   dispatch({ type: 'FETCH_BOARD_LIST', payload: { success: { data: boards } } });
+  // });
 
   const { isFetching, data: boards = [] } = boardListState;
 

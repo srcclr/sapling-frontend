@@ -206,3 +206,14 @@ export function fetchBoardDetails(boardId: number) {
     payload: { request: { data: { boardId } }, success: { data: {} } },
   } as const;
 }
+
+// WebsocketActions
+
+export function openedBoard(id: string, authToken) {
+  const message = { '@type': 'OpenedBoard', board: id, token: authToken };
+  return {
+    type: 'OPENED_BOARD',
+    message,
+    payload: { request: { data: { message } }, success: { board: {} as any } },
+  } as const;
+}

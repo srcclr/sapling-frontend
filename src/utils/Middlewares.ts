@@ -1,16 +1,18 @@
 import { getError } from 'utils/Helpers';
+import WebSocketsService from './WebSocketsService';
 
 // Borrowed from https://redux.js.org/recipes/reducing-boilerplate
 // and tweaked
 export const actionsMiddleware = ({ dispatch }) => next => action => {
-  const { type, callApi, payload = {} } = action;
+  const { type, callApi, message, payload = {} } = action;
+  console.log(action);
 
-  if (!callApi) {
+  if (!callApi && !message) {
     // Normal action: pass it on
     return next(action);
   }
 
-  if (typeof callApi !== 'function') {
+  if (callApi && typeof callApi !== 'function') {
     throw new Error('Expected callApi to be a function.');
   }
 
@@ -20,37 +22,41 @@ export const actionsMiddleware = ({ dispatch }) => next => action => {
     payload,
   });
 
-  return callApi()
-    .then(response => {
-      dispatch({
-        type,
-        subType: 'SUCCESS',
-        payload: {
-          ...payload,
-          success: {
-            data: response,
+  if (callApi) {
+    return callApi()
+      .then(response => {
+        dispatch({
+          type,
+          subType: 'SUCCESS',
+          payload: {
+            ...payload,
+            success: {
+              data: response,
+            },
           },
-        },
-      });
+        });
 
-      return {
-        data: response,
-      };
-    })
-    .catch(error => {
-      const errorMessage = getError(error);
+        return {
+          data: response,
+        };
+      })
+      .catch(error => {
+        const errorMessage = getError(error);
 
-      dispatch({
-        type,
-        subType: 'FAILURE',
-        payload: {
-          ...payload,
-          failure: {
-            error: errorMessage,
+        dispatch({
+          type,
+          subType: 'FAILURE',
+          payload: {
+            ...payload,
+            failure: {
+              error: errorMessage,
+            },
           },
-        },
-      });
+        });
 
-      throw errorMessage;
-    });
+        throw errorMessage;
+      });
+  } else if (message) {
+    WebSocketsService.send(message);
+  }
 };

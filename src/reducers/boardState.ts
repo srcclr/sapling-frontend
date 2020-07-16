@@ -30,6 +30,13 @@ const initialState = {
 const boardListState = (state: IBoardState = initialState, action: Actions) =>
   produce(state, draft => {
     switch (action.type) {
+      case 'OPENED_BOARD': {
+        asyncActionReducer(draft, action, ['isFetching'], () => {
+          const { board } = action.payload.success;
+          draft.data = board;
+        });
+        return;
+      }
       case 'SOLVE': {
         asyncActionReducer(draft, action, ['isSolving'], () => {
           const { data } = action.payload.success;

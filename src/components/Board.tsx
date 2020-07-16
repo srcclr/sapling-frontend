@@ -1,12 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  createContext,
-  useMemo,
-  useCallback,
-  useLayoutEffect,
-} from 'react';
+import React, { useEffect, useState, useRef, createContext, useMemo, useCallback } from 'react';
 import hash from 'object-hash';
 
 import _ from 'lodash';
@@ -18,9 +10,7 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { ChevronLeft, X, ChevronRight } from 'react-feather';
-import moment from 'moment';
 import Loader from 'react-loader-spinner';
-import config from 'utils/config';
 
 import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
@@ -97,13 +87,10 @@ function Board() {
   );
   const { boardId } = useParams();
 
-  WebSockets.onBoardUpdate(board => {
-    dispatch({ type: 'FETCH_BOARD', payload: board });
-  });
-
   useEffect(() => {
     refreshEpicsList();
-    WebSockets.openedBoard(boardId);
+    // WebSockets.openedBoard(boardId);
+    actions.openedBoard(boardId, AuthService.getAuthToken());
   }, []);
 
   const refreshEpicsList = () => {

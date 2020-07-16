@@ -6,7 +6,7 @@ import { Route, Switch, withRouter, Redirect, useHistory } from 'react-router-do
 import { useDispatch, useSelector } from 'react-redux';
 import { bindActionCreators, ActionCreatorsMapObject } from 'redux';
 import { toast } from 'react-toastify';
-import IStoreState, { ILoginState, IMyState } from 'store/IStoreState';
+import IStoreState, { IMyState } from 'store/IStoreState';
 
 import Login from 'components/Login';
 import SignUp from 'components/SignUp';
@@ -16,16 +16,39 @@ import DependenciesView from 'components/DependenciesView';
 import { checkUserStatus } from 'actions/appLoad';
 import Board from 'components/Board';
 import { SquareSpinner } from 'styles/ThemeComponents';
+import WebSocketsService from 'utils/WebSocketsService';
 
 toast.configure({ hideProgressBar: true });
+
+const messageToActionTypeMap = {
+  Board: 'OPENED_BOARD',
+  BoardList: 'OPENED_BOARD_LIST',
+};
+
+const createReceiveWsAction = (type, data) => ({
+  type,
+  subType: 'SUCCESS',
+  payload: { success: data },
+});
 
 export function App() {
   const myState = useSelector<IStoreState, IMyState>(state => state.myState);
   const history = useHistory();
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, ActionCreatorsMapObject>({ checkUserStatus }, dispatch);
+
+  const onMessageCallback = event => {
+    const data = JSON.parse(event.data);
+    const type = messageToActionTypeMap[data['@type']];
+    console.log('RECEIVING');
+    dispatch(createReceiveWsAction(type, data));
+  };
+
   useEffect(() => {
-    actions.checkUserStatus(history);
+    console.log('1111');
+    actions.checkUserStatus(history).then(() => {
+      WebSocketsService.initWebSocketConnection(onMessageCallback);
+    });
   }, []);
 
   const { isFetchingMe = false } = myState;

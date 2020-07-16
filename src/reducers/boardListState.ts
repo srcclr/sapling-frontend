@@ -18,6 +18,15 @@ const boardListState = (state: IBoardListState = initialState, action: Actions) 
         draft.data = data;
         return;
       }
+      case 'OPENED_BOARD_LIST': {
+        asyncActionReducer(draft, action, ['isFetching'], () => {
+          const { payload } = action;
+          const { success } = payload;
+          const { boards } = success;
+          draft.data = boards;
+        });
+        return;
+      }
       case 'CREATE_BOARD': {
         asyncActionReducer(draft, action, ['isCreating']);
         return;
