@@ -89,7 +89,6 @@ function Board() {
 
   useEffect(() => {
     refreshEpicsList();
-    // WebSockets.openedBoard(boardId);
     actions.openedBoard(boardId, AuthService.getAuthToken());
   }, []);
 
