@@ -390,6 +390,19 @@ function Board() {
       });
   };
 
+  const handleAcknowledgeNotification = (
+    notificationId: number,
+  ) => {
+    actions
+      .acknowledgeNotification(id, notificationId)
+      .then(res => {
+        toast.success('Success');
+      })
+      .catch(() => {
+        toast.error('Error');
+      });
+  };
+
   const { id: activeStoryId } = activeStory;
 
   const [activeNavigationTab, setActiveNavigationTab] = useState(NAVIGATION_LINKS.EPICS);
@@ -425,6 +438,7 @@ function Board() {
 
   const boardApi = useMemo(
     () => ({
+      currentBoardId: id,
       delayedHandleEditStory,
       handleAddingDependency,
       handleShowDependencyArrows,
@@ -582,6 +596,7 @@ function Board() {
                             <NotificationsList
                               notifications={notifications}
                               onAcceptOrRejectStoryRequest={handleAcceptOrRejectStoryRequest}
+                              onAcknowledgeNotification={handleAcknowledgeNotification}
                             />
                           </div>
                         </div>
