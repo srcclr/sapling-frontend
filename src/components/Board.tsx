@@ -423,7 +423,7 @@ function Board() {
   };
 
   const [storyRefs, storyRects] = useMultipleRects({ ids: sprintStoryIds });
-  
+
   const boardApi = useMemo(
     () => ({
       currentBoardId: id,
