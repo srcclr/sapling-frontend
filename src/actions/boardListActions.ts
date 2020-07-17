@@ -4,7 +4,7 @@ import { IBoard } from 'types';
 import { IBoardListItem } from 'store/IStoreState';
 
 export function openedBoardList(authToken) {
-  const message = { '@type': 'OpenedBoardList', token: authToken };
+  const message = { type: 'OpenedBoardList', token: authToken };
 
   return {
     type: 'OPENED_BOARD_LIST',

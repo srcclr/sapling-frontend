@@ -39,7 +39,7 @@ export function App() {
 
   const onMessageCallback = event => {
     const data = JSON.parse(event.data);
-    const type = messageTypeToActionTypeMap[data['@type']];
+    const type = messageTypeToActionTypeMap[data.type];
     dispatch(createReceiveWsAction(type, data));
   };
 

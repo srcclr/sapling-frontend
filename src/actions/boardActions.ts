@@ -210,7 +210,7 @@ export function fetchBoardDetails(boardId: number) {
 // WebsocketActions
 
 export function openedBoard(id: string, authToken) {
-  const message = { '@type': 'OpenedBoard', board: id, token: authToken };
+  const message = { type: 'OpenedBoard', board: id, token: authToken };
   return {
     type: 'OPENED_BOARD',
     message,
