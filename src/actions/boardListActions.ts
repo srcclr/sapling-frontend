@@ -3,12 +3,12 @@ import config from 'utils/config';
 import { IBoard } from 'types';
 import { IBoardListItem } from 'store/IStoreState';
 
-export function openedBoardList(authToken) {
-  const message = { '@type': 'OpenedBoardList', token: authToken };
+export function openedBoardList(socketWrapper) {
+  const message = { '@type': 'OpenedBoardList' };
 
   return {
     type: 'OPENED_BOARD_LIST',
-    message,
+    sendMessage: () => socketWrapper.send(message),
     payload: { request: {}, success: { boards: [] as IBoardListItem[] } },
   } as const;
 }
@@ -24,4 +24,13 @@ export function createBoard(boardName: string, ownerId: number) {
     callApi: () => ApiService.post(endpoint, { data }),
     payload: { request: {}, success: { data: {} as IBoard } },
   } as const;
+}
+
+export function updateIsInitialLoad(isInitialLoad: boolean) {
+  return {
+    type: 'UPDATE_BOARD_LIST_IS_INITIAL_LOAD',
+    payload: {
+      isInitialLoad,
+    },
+  };
 }

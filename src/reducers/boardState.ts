@@ -8,6 +8,7 @@ import { addDependency, deleteDependency } from 'types/utility';
 const initialState = {
   data: {},
   isSolving: false,
+  isInitialLoad: true,
   isFetching: false,
   isUpdatingBoard: false,
   isAddingDependency: false,
@@ -27,13 +28,20 @@ const initialState = {
   },
 };
 
-const boardListState = (state: IBoardState = initialState, action: Actions) =>
+const boardState = (state: IBoardState = initialState, action: Actions) =>
   produce(state, draft => {
     switch (action.type) {
+      case 'UPDATE_BOARD_IS_INITIAL_LOAD': {
+        const { payload } = action;
+        const { isInitialLoad: newIsInitialLoad } = payload;
+        draft.isInitialLoad = newIsInitialLoad;
+        return;
+      }
       case 'OPENED_BOARD': {
         asyncActionReducer(draft, action, ['isFetching'], () => {
           const { board } = action.payload.success;
           draft.data = board;
+          draft.isInitialLoad = false;
         });
         return;
       }
@@ -162,4 +170,4 @@ const boardListState = (state: IBoardState = initialState, action: Actions) =>
     }
   });
 
-export default boardListState;
+export default boardState;

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-named-as-default */
-import React, { useEffect } from 'react';
+import React, { useEffect, createContext, useState } from 'react';
 import { hot } from 'react-hot-loader';
 
 import { Route, Switch, withRouter, Redirect, useHistory } from 'react-router-dom';
@@ -16,7 +16,8 @@ import DependenciesView from 'components/DependenciesView';
 import { checkUserStatus } from 'actions/appLoad';
 import Board from 'components/Board';
 import { SquareSpinner } from 'styles/ThemeComponents';
-import WebSocketsService from 'utils/WebSocketsService';
+import WebSocketsService, { useWebSocket } from 'utils/WebSocketsService';
+import AuthService from 'utils/AuthService';
 
 toast.configure({ hideProgressBar: true });
 
@@ -31,6 +32,8 @@ const createReceiveWsAction = (type, data) => ({
   payload: { success: data },
 });
 
+export const SocketContext = createContext(null);
+
 export function App() {
   const myState = useSelector<IStoreState, IMyState>(state => state.myState);
   const history = useHistory();
@@ -43,12 +46,22 @@ export function App() {
     dispatch(createReceiveWsAction(type, data));
   };
 
+  const [userAuthToken, setUserAuthToken] = useState('');
+  // const [socket, setSocket] = useState({ d: 0 });
+
+  // let socket = { d: 0 };
+  // let d = 0;
+  // setInterval(() => {
+  //   setSocket({ d: socket.d++ });
+  // }, 100);
+
   useEffect(() => {
     actions.checkUserStatus(history).then(() => {
-      WebSocketsService.initWebSocketConnection();
-      WebSocketsService.handleMessage(onMessageCallback);
+      setUserAuthToken(AuthService.getAuthToken());
     });
   }, []);
+
+  const [socket] = useWebSocket({ messageHandler: onMessageCallback, userAuthToken });
 
   const { isFetchingMe = false } = myState;
 
@@ -61,14 +74,18 @@ export function App() {
           </div>
         </div>
       ) : (
-        <Switch>
-          <Redirect exact path="/" to={'/login'} />
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/signup" component={SignUp} />
-          <Route exact path="/boards" component={BoardList} />
-          <Route exact path="/boards/dependencies" component={DependenciesView} />
-          <Route exact path="/boards/:boardId" component={Board} />
-        </Switch>
+        <SocketContext.Provider value={{ socket }}>
+          <Switch>
+            <Redirect exact path="/" to={'/login'} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/signup" component={SignUp} />
+            <Route exact path="/boards" component={BoardList} />
+            {/* <Route exact path="/boards" component={() => <BoardList socket={socket} />} /> */}
+            <Route exact path="/boards/dependencies" component={DependenciesView} />
+            <Route exact path="/boards/:boardId" component={Board} />
+            {/* <Route exact path="/boards/:boardId" component={() => <Board socket={socket} />} /> */}
+          </Switch>
+        </SocketContext.Provider>
       )}
     </div>
   );
