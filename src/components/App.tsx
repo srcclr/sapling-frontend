@@ -42,18 +42,11 @@ export function App() {
 
   const onMessageCallback = event => {
     const data = JSON.parse(event.data);
-    const type = messageTypeToActionTypeMap[data['@type']];
+    const type = messageTypeToActionTypeMap[data.type];
     dispatch(createReceiveWsAction(type, data));
   };
 
   const [userAuthToken, setUserAuthToken] = useState('');
-  // const [socket, setSocket] = useState({ d: 0 });
-
-  // let socket = { d: 0 };
-  // let d = 0;
-  // setInterval(() => {
-  //   setSocket({ d: socket.d++ });
-  // }, 100);
 
   useEffect(() => {
     actions.checkUserStatus(history).then(() => {
