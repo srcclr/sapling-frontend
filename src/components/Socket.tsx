@@ -5,7 +5,7 @@ import { ISocketWrapper } from 'utils/WebSocketsService';
 function Socket({ onOpen }: { onOpen: (socket: ISocketWrapper) => void }) {
   const socketContext = useContext(SocketContext);
 
-  const { socket } = socketContext;
+  const { socket } = socketContext || {};
 
   const socketReadyState = socket && socket.instance ? socket.instance.readyState : '';
 

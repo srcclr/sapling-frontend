@@ -16,7 +16,7 @@ import DependenciesView from 'components/DependenciesView';
 import { checkUserStatus } from 'actions/appLoad';
 import Board from 'components/Board';
 import { SquareSpinner } from 'styles/ThemeComponents';
-import WebSocketsService, { useWebSocket } from 'utils/WebSocketsService';
+import { useWebSocket } from 'utils/WebSocketsService';
 import AuthService from 'utils/AuthService';
 
 toast.configure({ hideProgressBar: true });

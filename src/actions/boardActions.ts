@@ -220,7 +220,7 @@ export function updateBoardIsInitialLoad(isInitialLoad: boolean) {
 // WebsocketActions
 
 export function openedBoard(id: string, socketWrapper: ISocketWrapper) {
-  const message = { '@type': 'OpenedBoard', board: id };
+  const message = { type: 'OpenedBoard', board: id };
   return {
     type: 'OPENED_BOARD',
     sendMessage: () => socketWrapper.send(message),

@@ -4,7 +4,7 @@ import { IBoard } from 'types';
 import { IBoardListItem } from 'store/IStoreState';
 
 export function openedBoardList(socketWrapper) {
-  const message = { '@type': 'OpenedBoardList' };
+  const message = { type: 'OpenedBoardList' };
 
   return {
     type: 'OPENED_BOARD_LIST',
