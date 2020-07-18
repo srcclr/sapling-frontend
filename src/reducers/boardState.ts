@@ -64,38 +64,24 @@ const boardState = (state: IBoardState = initialState, action: Actions) =>
         return;
       }
       case 'CREATE_SPRINT': {
-        asyncActionReducer(draft, action, ['isCreatingSprint'], () => {
-          const { data: newSprint } = action.payload.success;
-          draft.data.sprints = [...draft.data.sprints, newSprint];
-        });
+        asyncActionReducer(draft, action, ['isCreatingSprint']);
         return;
       }
       case 'DELETE_SPRINT': {
         const { data } = action.payload.request;
         const { id } = data;
-        asyncActionReducerById(draft, action, id, ['sprintAsyncCallStateById'], () => {
-          draft.data.sprints =
-            draft.data.sprints && draft.data.sprints.filter(sprint => sprint.id !== id);
-        });
+        asyncActionReducerById(draft, action, id, ['sprintAsyncCallStateById']);
         return;
       }
       case 'UPDATE_SPRINT': {
         const { data } = action.payload.request;
         const { sprint } = data;
-        const { id, name, capacity } = sprint;
-        asyncActionReducerById(draft, action, id, ['sprintAsyncCallStateById'], () => {
-          // BE currently does not return updated Sprint.
-          const sprintIndex = draft.data.sprints.findIndex(s => s.id === id);
-          draft.data.sprints[sprintIndex].name = name;
-          draft.data.sprints[sprintIndex].capacity = capacity;
-        });
+        const { id } = sprint;
+        asyncActionReducerById(draft, action, id, ['sprintAsyncCallStateById']);
         return;
       }
       case 'CREATE_STORY': {
-        asyncActionReducer(draft, action, ['isCreatingStory'], () => {
-          const { data: newStory } = action.payload.success;
-          draft.data.unassigned = [...draft.data.unassigned, newStory]; // Current design simply adds story to backlog
-        });
+        asyncActionReducer(draft, action, ['isCreatingStory']);
         return;
       }
       case 'UPDATE_STORY': {
@@ -103,27 +89,7 @@ const boardState = (state: IBoardState = initialState, action: Actions) =>
         const { story } = data;
 
         const { id: storyId } = story;
-        asyncActionReducerById(draft, action, storyId, ['storyAsyncCallStateById'], () => {
-          // BE currently does not return updated Sprint.
-          const sprintIndex = _.findIndex(draft.data.sprints, { tickets: [{ id: storyId }] });
-          let ticketIndex;
-
-          // When story/ticket is found in sprints, find ticket index from its sprint.
-          // Look for story/ticket in unassigned/backlogs.
-          if (sprintIndex >= 0) {
-            ticketIndex = _.findIndex(draft.data.sprints[sprintIndex].tickets, { id: storyId });
-            draft.data.sprints[sprintIndex].tickets[ticketIndex] = {
-              ...draft.data.sprints[sprintIndex].tickets[ticketIndex],
-              ...story,
-            };
-          } else {
-            ticketIndex = _.findIndex(draft.data.unassigned, { id: storyId });
-            draft.data.unassigned[ticketIndex] = {
-              ...draft.data.unassigned[ticketIndex],
-              ...story,
-            };
-          }
-        });
+        asyncActionReducerById(draft, action, storyId, ['storyAsyncCallStateById']);
         return;
       }
       case 'ADD_DEPENDENCY': {

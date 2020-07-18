@@ -73,10 +73,8 @@ export function App() {
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={SignUp} />
             <Route exact path="/boards" component={BoardList} />
-            {/* <Route exact path="/boards" component={() => <BoardList socket={socket} />} /> */}
             <Route exact path="/boards/dependencies" component={DependenciesView} />
             <Route exact path="/boards/:boardId" component={Board} />
-            {/* <Route exact path="/boards/:boardId" component={() => <Board socket={socket} />} /> */}
           </Switch>
         </SocketContext.Provider>
       )}
