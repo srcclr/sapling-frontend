@@ -20,14 +20,6 @@ export function useWebSocket(props) {
 
   const [readyState, setReadyState] = useState(undefined);
 
-  const sendFn = (i: WebSocket, token: string) => {
-    return message => {
-      if (i) {
-        i.send(JSON.stringify({ ...message, token }));
-      }
-    };
-  };
-
   /**
    * socketWrapper state stores the current instance and the `send` function.
    * `send` function is run the MiddleWare executes `sendMessage()` defined in
@@ -35,9 +27,12 @@ export function useWebSocket(props) {
    */
   const [socketWrapper, setSocketWrapper] = useState<ISocketWrapper>({
     instance,
-    send: sendFn(instance, userAuthToken),
+    send: () => {}, // Noop
   });
 
+  /**
+   * This useEffect is to instatiate and track the active WebSocket instance
+   */
   useEffect(
     () => {
       if (!instance) {
@@ -56,7 +51,6 @@ export function useWebSocket(props) {
 
         ws.onclose = function() {
           setReadyState(ws.readyState);
-
           // Try to reconnect
           // We handle reconnection by detecting CLOSED readyState in useEffect below
         };
@@ -82,14 +76,20 @@ export function useWebSocket(props) {
   );
 
   /**
-   * Creates and sets SocketWrapper when instance and userAuthToken changes
+   * Creates and sets SocketWrapper when instance and userAuthToken changes.
+   * This useEffect is primarily to instatiate the SocketWrapper and supply
+   * the updated userAuthToken hence separated for its purpose.
    */
   useEffect(
     () => {
       if (instance) {
         setSocketWrapper({
           instance,
-          send: sendFn(instance, userAuthToken),
+          send: message => {
+            if (instance && userAuthToken) {
+              instance.send(JSON.stringify({ ...message, token: userAuthToken }));
+            }
+          },
         });
       }
     },
