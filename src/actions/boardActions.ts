@@ -3,6 +3,7 @@ import ApiService from 'utils/ApiService';
 import config from 'utils/config';
 import { ISprint, IStory, IBoard } from 'types';
 import { getNumberValue } from 'utils/Helpers';
+import { ISocketWrapper } from 'utils/WebSocketsService';
 
 export function deleteBoard(boardId: number) {
   return {
@@ -207,13 +208,22 @@ export function fetchBoardDetails(boardId: number) {
   } as const;
 }
 
+export function updateBoardIsInitialLoad(isInitialLoad: boolean) {
+  return {
+    type: 'UPDATE_BOARD_IS_INITIAL_LOAD',
+    payload: {
+      isInitialLoad,
+    },
+  };
+}
+
 // WebsocketActions
 
-export function openedBoard(id: string, authToken) {
-  const message = { type: 'OpenedBoard', board: id, token: authToken };
+export function openedBoard(id: string, socketWrapper: ISocketWrapper) {
+  const message = { type: 'OpenedBoard', board: id };
   return {
     type: 'OPENED_BOARD',
-    message,
+    sendMessage: () => socketWrapper.send(message),
     payload: { request: { data: { message } }, success: { board: {} as any } },
   } as const;
 }

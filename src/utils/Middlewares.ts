@@ -1,12 +1,11 @@
 import { getError } from 'utils/Helpers';
-import WebSocketsService from './WebSocketsService';
 
 // Borrowed from https://redux.js.org/recipes/reducing-boilerplate
 // and tweaked
 export const actionsMiddleware = ({ dispatch }) => next => action => {
-  const { type, callApi, message, payload = {} } = action;
+  const { type, callApi, sendMessage, payload = {} } = action;
 
-  if (!callApi && !message) {
+  if (!callApi && !sendMessage) {
     // Normal action: pass it on
     return next(action);
   }
@@ -55,7 +54,7 @@ export const actionsMiddleware = ({ dispatch }) => next => action => {
 
         throw errorMessage;
       });
-  } else if (message) {
-    WebSocketsService.send(message);
+  } else if (sendMessage) {
+    sendMessage();
   }
 };
