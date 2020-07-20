@@ -20,6 +20,7 @@ export interface IDependenciesViewState {
 
 export interface IBoardListState {
   data?: IBoardListItem[];
+  isInitialLoad?: boolean;
   isFetching?: boolean;
   errorMessage?: string;
 }
@@ -46,6 +47,7 @@ export interface IEpicsListState {
 
 export interface IBoardState {
   data?: IBoard;
+  isInitialLoad?: boolean;
   isSolving?: boolean;
   isFetching?: boolean;
   isUpdatingBoard?: boolean;

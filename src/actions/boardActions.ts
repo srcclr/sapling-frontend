@@ -3,16 +3,7 @@ import ApiService from 'utils/ApiService';
 import config from 'utils/config';
 import { ISprint, IStory, IBoard } from 'types';
 import { getNumberValue } from 'utils/Helpers';
-
-export function fetchBoard(boardId: number) {
-  const endpoint = `${config.API_URL}/login`;
-
-  return {
-    type: 'FETCH_BOARD',
-    callApi: () => ApiService.get(`/board/${boardId}`),
-    payload: { request: { data: { boardId } }, success: { data: {} } },
-  } as const;
-}
+import { ISocketWrapper } from 'utils/WebSocketsService';
 
 export function deleteBoard(boardId: number) {
   return {
@@ -222,11 +213,29 @@ export function acknowledgeNotification(
 // Requires endpoint to return epics and sprints by board Id
 // Use case for this now is to retrieve epic and sprints to select for interboard dependency
 export function fetchBoardDetails(boardId: number) {
-  const endpoint = `${config.API_URL}/boards`;
-
   return {
     type: 'FETCH_BOARD_DETAILS',
     callApi: () => ApiService.get(`/board/${boardId}`),
     payload: { request: { data: { boardId } }, success: { data: {} } },
+  } as const;
+}
+
+export function updateBoardIsInitialLoad(isInitialLoad: boolean) {
+  return {
+    type: 'UPDATE_BOARD_IS_INITIAL_LOAD',
+    payload: {
+      isInitialLoad,
+    },
+  };
+}
+
+// WebsocketActions
+
+export function openedBoard(id: string, socketWrapper: ISocketWrapper) {
+  const message = { type: 'OpenedBoard', board: id };
+  return {
+    type: 'OPENED_BOARD',
+    sendMessage: () => socketWrapper.send(message),
+    payload: { request: { data: { message } }, success: { board: {} as any } },
   } as const;
 }

@@ -2,18 +2,20 @@ import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Trash, Edit2, ChevronRight } from 'react-feather';
 import { useForm } from 'react-hook-form';
 
 import { deleteBoard } from 'actions/boardActions';
-import { fetchBoardList, createBoard } from 'actions/boardListActions';
+import { createBoard, openedBoardList, updateIsInitialLoad } from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
 import IStoreState, { IBoardListState, IMyState } from 'store/IStoreState';
 import { IBoard } from '../types';
 import { Dialog, SquareSpinner } from 'styles/ThemeComponents';
 import AuthService from 'utils/AuthService';
+import { ISocketWrapper } from 'utils/WebSocketsService';
+import Socket from './Socket';
 
 function BoardList() {
   const { handleSubmit, register, reset, watch } = useForm();
@@ -27,10 +29,11 @@ function BoardList() {
 
   const { boardListState = {}, myState = {} } = storeState;
   const { id, firstName } = myState;
+  '';
 
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, BoundActionsObjectMap>(
-    { fetchBoardList, createBoard, deleteBoard },
+    { createBoard, deleteBoard, openedBoardList, updateIsInitialLoad },
     dispatch
   );
 
@@ -47,7 +50,6 @@ function BoardList() {
           pauseOnHover: true,
           draggable: true,
         });
-        actions.fetchBoardList();
         reset();
       })
       .catch(() => {
@@ -66,16 +68,19 @@ function BoardList() {
     const { id: boardId } = boardToDelete;
     actions.deleteBoard(boardId).then(() => {
       toast.info('Deleted successfully');
-      actions.fetchBoardList();
       setIsDeleteDialogOpen(false);
     });
   };
 
+  const handleSocketOnOpen = (socketWrapper: ISocketWrapper) => {
+    actions.openedBoardList(socketWrapper);
+  };
+
   useEffect(() => {
-    actions.fetchBoardList();
+    return () => actions.updateIsInitialLoad(true);
   }, []);
 
-  const { isFetching, data: boards = [] } = boardListState;
+  const { isFetching, isInitialLoad, data: boards = [] } = boardListState;
 
   const handleCloseDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
@@ -95,6 +100,8 @@ function BoardList() {
   const { id: boardIdToDelete, name: boardNameToDelete } = boardToDelete;
   return (
     <div>
+      <Socket onOpen={handleSocketOnOpen} />
+
       <div className="p-6 flex justify-end items-center">
         <div className="mr-2 pr-2 border-r border-gray-200">{firstName}</div>{' '}
         <button className="btn btn-minimal text-xs" onClick={handleLogout}>
@@ -117,7 +124,7 @@ function BoardList() {
             Add
           </button>
         </form>
-        {isFetching ? (
+        {isInitialLoad ? (
           <SquareSpinner className="mt-20" />
         ) : boards.length > 0 ? (
           boards.map((board, i) => {

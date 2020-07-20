@@ -5,6 +5,7 @@ import produce from 'immer';
 import { asyncActionReducer } from 'utils/Helpers';
 const initialState = {
   data: [],
+  isInitialLoad: true,
   isFetching: false,
   isCreating: false,
   errorMessage: '',
@@ -13,10 +14,24 @@ const initialState = {
 const boardListState = (state: IBoardListState = initialState, action: Actions) =>
   produce(state, draft => {
     switch (action.type) {
+      case 'UPDATE_BOARD_LIST_IS_INITIAL_LOAD': {
+        const { payload } = action;
+        const { isInitialLoad: newIsInitialLoad } = payload;
+        draft.isInitialLoad = newIsInitialLoad;
+        return;
+      }
       case 'FETCH_BOARD_LIST': {
+        const { data } = action.payload.success;
+        draft.data = data;
+        return;
+      }
+      case 'OPENED_BOARD_LIST': {
         asyncActionReducer(draft, action, ['isFetching'], () => {
-          const { data } = action.payload.success;
-          draft.data = data;
+          const { payload } = action;
+          const { success } = payload;
+          const { boards } = success;
+          draft.data = boards;
+          draft.isInitialLoad = false;
         });
         return;
       }
