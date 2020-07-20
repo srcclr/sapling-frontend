@@ -16,7 +16,7 @@ import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
 import * as boardListActions from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
-import WebSockets, { ISocketWrapper } from 'utils/WebSocketsService';
+import { ISocketWrapper } from 'utils/WebSocketsService';
 
 import AuthService from 'utils/AuthService';
 
@@ -94,15 +94,12 @@ function Board({ socket }: { socket: ISocketWrapper }) {
   };
 
   useEffect(() => {
-    refreshEpicsList();
-
+    refreshBoardList();
     return () => actions.updateBoardIsInitialLoad(true);
   }, []);
 
-  const refreshEpicsList = () => {
-    if (!isNaN(parseInt(boardId))) {
-      actions.fetchEpicsList(parseInt(boardId));
-    }
+  const refreshBoardList = () => {
+    actions.fetchBoardList();
   };
 
   const { data: boardList = [] } = boardListState;
@@ -116,7 +113,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
     sprintAsyncCallStateById = {},
     storyAsyncCallStateById = {},
   } = boardState;
-  const { name, id, sprints = [], unassigned = [], notifications = [] } = board;
+  const { name, id, sprints = [], epics = [], unassigned = [], notifications = [] } = board;
   const { storiesCountMap, loadMap, sprintStoryIds = [] } = getStatsMap(sprints, unassigned);
   const hasStoriesAndSprints = hasStories(storiesCountMap) && sprints && sprints.length > 0;
 
@@ -271,11 +268,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
       });
   };
 
-  const {
-    isFetchingEpicsList = false,
-    data: epics = [],
-    epicAsyncCallStateById = {},
-  } = epicsListState;
+  const { epicAsyncCallStateById = {} } = epicsListState;
 
   const uploadInputRef = useRef();
 
@@ -363,9 +356,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
       });
   };
 
-  const handleAcknowledgeNotification = (
-    notificationId: number,
-  ) => {
+  const handleAcknowledgeNotification = (notificationId: number) => {
     actions
       .acknowledgeNotification(id, notificationId)
       .then(res => {
@@ -447,7 +438,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
     () => ({
       notificationsCount: notifications.length || 0,
     }),
-    []
+    [notifications.length]
   );
 
   return (

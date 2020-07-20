@@ -68,16 +68,9 @@ const boardState = (state: IBoardState = initialState, action: Actions) =>
         return;
       }
       case 'DELETE_SPRINT': {
-        const { data } = action.payload.request;
-        const { id } = data;
-        asyncActionReducerById(draft, action, id, ['sprintAsyncCallStateById']);
         return;
       }
       case 'UPDATE_SPRINT': {
-        const { data } = action.payload.request;
-        const { sprint } = data;
-        const { id } = sprint;
-        asyncActionReducerById(draft, action, id, ['sprintAsyncCallStateById']);
         return;
       }
       case 'CREATE_STORY': {
@@ -85,46 +78,15 @@ const boardState = (state: IBoardState = initialState, action: Actions) =>
         return;
       }
       case 'UPDATE_STORY': {
-        const { data } = action.payload.request;
-        const { story } = data;
-
-        const { id: storyId } = story;
-        asyncActionReducerById(draft, action, storyId, ['storyAsyncCallStateById']);
         return;
       }
       case 'ADD_DEPENDENCY': {
-        const { data } = action.payload.request;
-        const { fromStoryId, toStoryId } = data;
-        asyncActionReducer(draft, action, ['isAddingDependency'], () => {
-          addDependency(draft.data, fromStoryId, toStoryId);
-        });
         return;
       }
       case 'DELETE_DEPENDENCY': {
-        const { data } = action.payload.request;
-        const { fromStoryId, toStoryId } = data;
-        asyncActionReducer(draft, action, ['isDeletingDependency'], () => {
-          deleteDependency(draft.data, fromStoryId, toStoryId);
-        });
         return;
       }
       case 'DELETE_STORY': {
-        const { data } = action.payload.request;
-        const { storyId, sprintId } = data;
-
-        asyncActionReducerById(draft, action, storyId, ['sprintAsyncCallStateById'], () => {
-          if (!sprintId) {
-            draft.data.unassigned = draft.data.unassigned.filter(story => story.id !== storyId);
-          } else {
-            const i = draft.data.sprints.findIndex(sprint => sprint.id === sprintId);
-
-            if (i >= 0) {
-              draft.data.sprints[i].tickets = draft.data.sprints[i].tickets.filter(
-                story => story.id !== storyId
-              );
-            }
-          }
-        });
         return;
       }
       case 'UPLOAD_CSV': {

@@ -8,6 +8,7 @@ export interface IBoard {
   id?: number;
   name?: string;
   owner?: string;
+  epics?: IEpic[];
   sprints?: ISprint[];
   unassigned?: IStory[];
   notifications?: INotification[];
@@ -26,11 +27,11 @@ export interface INotification {
 }
 
 export enum NOTIFICATION_TYPE {
-  INCOMING_STORY_REQUEST = "IncomingStoryRequest",
-  STORY_REQUEST_ACCEPTED = "StoryRequestAccepted",
-  STORY_REQUEST_REJECTED = "StoryRequestRejected",
-  STORY_REQUEST_WITHDRAWN = "StoryRequestWithdrawn",
-  STORY_REQUEST_RESUBMITTED = "StoryRequestResubmitted",
+  INCOMING_STORY_REQUEST = 'IncomingStoryRequest',
+  STORY_REQUEST_ACCEPTED = 'StoryRequestAccepted',
+  STORY_REQUEST_REJECTED = 'StoryRequestRejected',
+  STORY_REQUEST_WITHDRAWN = 'StoryRequestWithdrawn',
+  STORY_REQUEST_RESUBMITTED = 'StoryRequestResubmitted',
 }
 
 export interface IEpic {

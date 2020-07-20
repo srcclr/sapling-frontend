@@ -15,13 +15,6 @@ const initialState = {
 const epicsListState = (state: IEpicsListState = initialState, action: Actions) =>
   produce(state, draft => {
     switch (action.type) {
-      case 'FETCH_EPICS_LIST': {
-        asyncActionReducer(draft, action, ['isFetchingEpicsList'], () => {
-          const { data } = action.payload.success;
-          draft.data = data;
-        });
-        return;
-      }
       case 'CREATE_EPIC': {
         asyncActionReducer(draft, action, ['isCreatingEpic'], () => {
           const { data: newEpic } = action.payload.success;

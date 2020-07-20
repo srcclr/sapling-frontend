@@ -13,6 +13,20 @@ export function openedBoardList(socketWrapper) {
   } as const;
 }
 
+/**
+ * Fetches boards list for listing available boards in the
+ * cross board dependency options.
+ */
+export function fetchBoardList() {
+  const endpoint = `${config.API_URL}/boards`;
+
+  return {
+    type: 'FETCH_BOARD_LIST',
+    callApi: () => ApiService.get(endpoint),
+    payload: { request: {}, success: { data: [] as IBoard[] } },
+  } as const;
+}
+
 export function createBoard(boardName: string, ownerId: number) {
   const endpoint = `${config.API_URL}/boards`;
   const data = {
