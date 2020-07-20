@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { ArcherElement } from 'react-archer';
 import { IStory, STORY_REQUEST_ACTION, IStoryRequestWithViewData } from 'types';
 import { Trash, X, MoreVertical, PlusSquare, GitPullRequest } from 'react-feather';
-import Loader from 'react-loader-spinner';
 import { useForm } from 'react-hook-form';
 import { useOnClickOutside } from 'hooks';
 import { getNumberValue } from 'utils/Helpers';

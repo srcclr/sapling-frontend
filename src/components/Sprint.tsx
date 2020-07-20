@@ -1,7 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
 import { Trash } from 'react-feather';
-import Loader from 'react-loader-spinner';
 import { ReturnIconWrap } from 'styles/ThemeComponents';
 
 import { ISprint } from 'types';
@@ -81,11 +80,7 @@ const Sprint: React.FunctionComponent<ISprint & ISprintProps> = ({
         </form>
         <div className="p-4 flex-grow-0">
           <div className=" h-8 w-8 flex flex-row items-center justify-center">
-            {isLoading ? (
-              <Loader type="Grid" width={13} height={13} />
-            ) : (
-              <Trash size="16" className="clickable" onClick={() => onDelete(id)} />
-            )}
+            <Trash size="16" className="clickable" onClick={() => onDelete(id)} />
           </div>
         </div>
       </div>
