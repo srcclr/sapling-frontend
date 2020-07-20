@@ -82,6 +82,11 @@ export interface IStoryRequestWithViewData extends IStoryRequest {
   storyEpicName?: string;
 }
 
+export interface IClient {
+  email?: string;
+  uuid?: string;
+}
+
 export interface ICrossBoardData {
   boardId?: number;
   sprints?: SprintPreview[];

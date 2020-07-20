@@ -1,4 +1,4 @@
-import { IBoard, IEpic, IError, ICrossDeps, ISignUpParams } from '../types';
+import { IBoard, IEpic, IError, ICrossDeps, ISignUpParams, IClient } from '../types';
 import { FormStateMap } from 'redux-form';
 export default interface IStoreState {
   readonly form: FormStateMap;
@@ -47,6 +47,7 @@ export interface IEpicsListState {
 
 export interface IBoardState {
   data?: IBoard;
+  clients?: IClient[];
   isInitialLoad?: boolean;
   isSolving?: boolean;
   isFetching?: boolean;

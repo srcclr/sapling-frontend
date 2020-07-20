@@ -52,6 +52,7 @@
     "@types/redux-form": "8.1.5",
     "basscss": "8.0.2",
     "classnames": "2.2.6",
+    "color-hash": "1.0.3",
     "connected-react-router": "6.7.0",
     "file-saver": "2.0.2",
     "immer": "1.7.2",

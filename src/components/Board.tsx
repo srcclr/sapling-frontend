@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, createContext, useMemo, useCallback } from 'react';
-import hash from 'object-hash';
+import ColorHash from 'color-hash';
 
 import _ from 'lodash';
 import { toast } from 'react-toastify';
@@ -56,8 +56,8 @@ import SprintStats from './SprintStats';
 import NotificationsList from './NotificationsList';
 import SideNavigation from './SideNavigation';
 import { useMultipleRects } from 'use-multiple-rects';
-import { SocketContext } from './App';
 import Socket from './Socket';
+import ClientBadge from './ClientBadge';
 
 interface StateSelector {
   boardListState?: IBoardListState;
@@ -69,6 +69,8 @@ interface StateSelector {
 export const BoardContext = createContext(null);
 
 function Board({ socket }: { socket: ISocketWrapper }) {
+  const colorHash = new ColorHash();
+
   const state =
     useSelector<IStoreState, StateSelector>(state => ({
       boardListState: state.boardListState,
@@ -106,6 +108,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
 
   const {
     data: board = {},
+    clients,
     isInitialLoad,
     isFetching,
     isSolving,
@@ -116,6 +119,19 @@ function Board({ socket }: { socket: ISocketWrapper }) {
   const { name, id, sprints = [], epics = [], unassigned = [], notifications = [] } = board;
   const { storiesCountMap, loadMap, sprintStoryIds = [] } = getStatsMap(sprints, unassigned);
   const hasStoriesAndSprints = hasStories(storiesCountMap) && sprints && sprints.length > 0;
+
+  const [clientColors, setClientColors] = useState({});
+
+  useEffect(
+    () => {
+      const newClientColors = {};
+      clients.forEach(client => {
+        newClientColors[client.uuid] = colorHash.hex(client.uuid);
+      });
+      setClientColors(newClientColors);
+    },
+    [JSON.stringify(clients)]
+  );
 
   const handleCreateSprint = (sprint: ISprint) => {
     actions.createSprint(id, sprint);
@@ -464,7 +480,20 @@ function Board({ socket }: { socket: ISocketWrapper }) {
                 </div>
 
                 <div className="flex flex-row items-center">
-                  <div className="flex flex-row mr-2 mr-4 pr-4 border-r">
+                  <div className="flex flex-row mr-4 pr-4 border-r">
+                    {clients && clients.length > 0
+                      ? clients.map((client, i) => {
+                          return (
+                            <ClientBadge
+                              key={i}
+                              client={client}
+                              hexColor={clientColors[client.uuid]}
+                            />
+                          );
+                        })
+                      : ''}
+                  </div>
+                  <div className="flex flex-row mr-4 pr-4 border-r">
                     <input
                       type="file"
                       id="file"

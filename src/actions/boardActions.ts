@@ -197,10 +197,7 @@ export function acceptOrRejectStoryRequest(
   } as const;
 }
 
-export function acknowledgeNotification(
-  boardId: number,
-  notificationId: number
-) {
+export function acknowledgeNotification(boardId: number, notificationId: number) {
   return {
     type: 'ACKNOWLEDGE_NOTIFICATION',
     callApi: () =>
@@ -233,6 +230,20 @@ export function updateBoardIsInitialLoad(isInitialLoad: boolean) {
 
 export function openedBoard(id: string, socketWrapper: ISocketWrapper) {
   const message = { type: 'OpenedBoard', board: id };
+  return {
+    type: 'OPENED_BOARD',
+    sendMessage: () => socketWrapper.send(message),
+    payload: { request: { data: { message } }, success: { board: {} as any } },
+  } as const;
+}
+
+export function editingStory(
+  id: string,
+  storyId: number,
+  done: boolean,
+  socketWrapper: ISocketWrapper
+) {
+  const message = { type: 'EditingStory', board: id, story: storyId, done };
   return {
     type: 'OPENED_BOARD',
     sendMessage: () => socketWrapper.send(message),
