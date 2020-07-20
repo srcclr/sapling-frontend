@@ -345,6 +345,7 @@ function Board() {
       .deleteEpic(epicId)
       .then(() => {
         toast.success('Epic successfully deleted');
+        setIsDeleteDialogOpen(false);
       })
       .catch(() => {
         toast.error('Error deleting epic');

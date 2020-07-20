@@ -67,6 +67,7 @@ function BoardList() {
     actions.deleteBoard(boardId).then(() => {
       toast.info('Deleted successfully');
       actions.fetchBoardList();
+      setIsDeleteDialogOpen(false);
     });
   };
 
