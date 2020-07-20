@@ -1,12 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  createContext,
-  useMemo,
-  useCallback,
-  useLayoutEffect,
-} from 'react';
+import React, { useEffect, useState, useRef, createContext, useMemo, useCallback } from 'react';
 import hash from 'object-hash';
 
 import _ from 'lodash';
@@ -18,15 +10,13 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { ChevronLeft, X, ChevronRight } from 'react-feather';
-import moment from 'moment';
 import Loader from 'react-loader-spinner';
-import config from 'utils/config';
 
 import * as boardActions from 'actions/boardActions';
 import * as epicsActions from 'actions/epicsActions';
 import * as boardListActions from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
-import WebSockets from 'utils/WebSocketsService';
+import WebSockets, { ISocketWrapper } from 'utils/WebSocketsService';
 
 import AuthService from 'utils/AuthService';
 
@@ -66,6 +56,8 @@ import SprintStats from './SprintStats';
 import NotificationsList from './NotificationsList';
 import SideNavigation from './SideNavigation';
 import { useMultipleRects } from 'use-multiple-rects';
+import { SocketContext } from './App';
+import Socket from './Socket';
 
 interface StateSelector {
   boardListState?: IBoardListState;
@@ -76,7 +68,7 @@ interface StateSelector {
 
 export const BoardContext = createContext(null);
 
-function Board() {
+function Board({ socket }: { socket: ISocketWrapper }) {
   const state =
     useSelector<IStoreState, StateSelector>(state => ({
       boardListState: state.boardListState,
@@ -85,7 +77,6 @@ function Board() {
       myState: state.myState,
     })) || {};
 
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { boardState, epicsListState, boardListState, myState } = state;
 
   const { firstName } = myState;
@@ -95,15 +86,17 @@ function Board() {
     { ...boardActions, ...epicsActions, ...boardListActions },
     dispatch
   );
+
   const { boardId } = useParams();
 
-  WebSockets.onBoardUpdate(board => {
-    dispatch({ type: 'FETCH_BOARD', payload: board });
-  });
+  const handleSocketOnOpen = (socketWrapper: ISocketWrapper) => {
+    actions.openedBoard(boardId, socketWrapper);
+  };
 
   useEffect(() => {
     refreshEpicsList();
-    WebSockets.openedBoard(boardId);
+
+    return () => actions.updateBoardIsInitialLoad(true);
   }, []);
 
   const refreshEpicsList = () => {
@@ -116,6 +109,7 @@ function Board() {
 
   const {
     data: board = {},
+    isInitialLoad,
     isFetching,
     isSolving,
     isUploadingCsv,
@@ -443,9 +437,10 @@ function Board() {
 
   return (
     <BoardContext.Provider value={boardApi}>
+      <Socket onOpen={handleSocketOnOpen} />
       <div className="w-full ">
         <div className={`flex-grow overflow-y-auto ${isUploadingCsv ? 'opacity-75' : ''}`}>
-          {isFetching && isInitialLoad ? (
+          {isInitialLoad ? (
             <div className="flex items-stretch h-screen border-4 ">
               <div className="mx-auto w-1/12 self-center pb-16">
                 <SquareSpinner className="mt-20" />
@@ -631,7 +626,6 @@ function Board() {
                                 const { isLoading: isSprintLoading = false } = sprintCallState;
                                 const load = loadMap[sprintId];
                                 const loadLeft = capacity - load;
-
                                 return (
                                   <Sprint
                                     key={i}

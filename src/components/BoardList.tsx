@@ -8,13 +8,14 @@ import { Trash, Edit2, ChevronRight } from 'react-feather';
 import { useForm } from 'react-hook-form';
 
 import { deleteBoard } from 'actions/boardActions';
-import { createBoard } from 'actions/boardListActions';
+import { createBoard, openedBoardList, updateIsInitialLoad } from 'actions/boardListActions';
 import { BoundActionsObjectMap } from 'actions/actionTypes';
 import IStoreState, { IBoardListState, IMyState } from 'store/IStoreState';
 import { IBoard } from '../types';
 import { Dialog, SquareSpinner } from 'styles/ThemeComponents';
 import AuthService from 'utils/AuthService';
-import WebSockets from 'utils/WebSocketsService';
+import { ISocketWrapper } from 'utils/WebSocketsService';
+import Socket from './Socket';
 
 function BoardList() {
   const { handleSubmit, register, reset, watch } = useForm();
@@ -28,10 +29,11 @@ function BoardList() {
 
   const { boardListState = {}, myState = {} } = storeState;
   const { id, firstName } = myState;
+  '';
 
   const dispatch = useDispatch();
   const actions = bindActionCreators<{}, BoundActionsObjectMap>(
-    { createBoard, deleteBoard },
+    { createBoard, deleteBoard, openedBoardList, updateIsInitialLoad },
     dispatch
   );
 
@@ -69,14 +71,15 @@ function BoardList() {
     });
   };
 
-  useEffect(() => {
-    WebSockets.openedBoardList();
-  }, []);
-  WebSockets.onBoardListUpdate(boards => {
-    dispatch({ type: 'FETCH_BOARD_LIST', payload: { success: { data: boards } } });
-  });
+  const handleSocketOnOpen = (socketWrapper: ISocketWrapper) => {
+    actions.openedBoardList(socketWrapper);
+  };
 
-  const { isFetching, data: boards = [] } = boardListState;
+  useEffect(() => {
+    return () => actions.updateIsInitialLoad(true);
+  }, []);
+
+  const { isFetching, isInitialLoad, data: boards = [] } = boardListState;
 
   const handleCloseDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
@@ -96,6 +99,8 @@ function BoardList() {
   const { id: boardIdToDelete, name: boardNameToDelete } = boardToDelete;
   return (
     <div>
+      <Socket onOpen={handleSocketOnOpen} />
+
       <div className="p-6 flex justify-end items-center">
         <div className="mr-2 pr-2 border-r border-gray-200">{firstName}</div>{' '}
         <button className="btn btn-minimal text-xs" onClick={handleLogout}>
@@ -118,7 +123,7 @@ function BoardList() {
             Add
           </button>
         </form>
-        {isFetching ? (
+        {isInitialLoad ? (
           <SquareSpinner className="mt-20" />
         ) : boards.length > 0 ? (
           boards.map((board, i) => {
