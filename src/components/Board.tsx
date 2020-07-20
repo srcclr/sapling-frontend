@@ -91,8 +91,11 @@ function Board({ socket }: { socket: ISocketWrapper }) {
 
   const { boardId } = useParams();
 
+  const [socketWrapperInstance, setSocketWrapperInstance] = useState<ISocketWrapper>(null);
+
   const handleSocketOnOpen = (socketWrapper: ISocketWrapper) => {
     actions.openedBoard(boardId, socketWrapper);
+    setSocketWrapperInstance(socketWrapper);
   };
 
   useEffect(() => {
@@ -198,6 +201,12 @@ function Board({ socket }: { socket: ISocketWrapper }) {
     dependencies?: string;
     weight?: number;
   }>({});
+
+  const handleClientEditingStory = ({ story, board, done }) => {
+    if (socketWrapperInstance) {
+      actions.editingStory(board, story, done, socketWrapperInstance);
+    }
+  };
 
   const handleAddingDependency = useCallback(story => {
     setDependencyMode(true);
@@ -420,6 +429,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
     () => ({
       currentBoardId: id,
       delayedHandleEditStory,
+      handleClientEditingStory,
       handleAddingDependency,
       handleShowDependencyArrows,
       handleAddAsDependency,

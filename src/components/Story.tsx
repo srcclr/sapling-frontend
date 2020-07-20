@@ -1,4 +1,4 @@
-import React, { useState, useContext, createRef } from 'react';
+import React, { useState, useContext, createRef, useEffect } from 'react';
 import _ from 'lodash';
 import { ArcherElement } from 'react-archer';
 import { IStory, STORY_REQUEST_ACTION, IStoryRequestWithViewData } from 'types';
@@ -41,6 +41,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   const {
     currentBoardId,
     delayedHandleEditStory,
+    handleClientEditingStory,
     handleAddingDependency,
     handleAddAsDependency,
     handleShowDependencyArrows,
@@ -59,6 +60,26 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     storyRects,
     activeDepArrowsStory,
   } = board;
+
+  /**
+   * We send a message to update the server on whether the user or the client
+   * is editing this story. Editing the story means isActive is true and
+   * the done state is false. Otherwise, when user is not editing the story, isActive
+   * is false and done state is true.
+   */
+  const [clientEditingStoryDoneState, setClientEditingStoryDoneState] = useState(true);
+  useEffect(
+    () => {
+      if (isActive && clientEditingStoryDoneState) {
+        handleClientEditingStory({ story: id, board: currentBoardId, done: false });
+        setClientEditingStoryDoneState(false);
+      } else if (!isActive && !clientEditingStoryDoneState) {
+        handleClientEditingStory({ story: id, board: currentBoardId, done: true });
+        setClientEditingStoryDoneState(true);
+      }
+    },
+    [isActive, clientEditingStoryDoneState]
+  );
 
   // storyRefs is an object containing all the refs returned by the useMultipleRects
   // for purposes of tracking ticket DOM dimentions and positions. For now, we only do this for
