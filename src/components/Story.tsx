@@ -328,9 +328,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
               <div className="tag rounded-lg text-center">{id}</div>
             </div>
             <div className=" h-6 w-6 flex flex-row items-center justify-center">
-              {isLoading ? (
-                <Loader type="Grid" width={13} height={13} />
-              ) : !crossBoardDependents ? (
+              {!crossBoardDependents ? (
                 <Trash size="16" className="clickable" onClick={handleDelete} />
               ) : (
                 ''
@@ -444,7 +442,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                 <div className="mt-2 text-xs cross w-full">
                   <div className="font-semibold mb-2">Cross Board Dependencies</div>
                   <CrossBoardDependencies
-                    currentBoardId = {currentBoardId}
+                    currentBoardId={currentBoardId}
                     boardList={boardList}
                     onBoardSelect={handleDependencyBoardSelect}
                     data={crossBoardData}
