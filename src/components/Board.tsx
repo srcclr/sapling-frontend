@@ -318,6 +318,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
       .deleteEpic(epicId)
       .then(() => {
         toast.success('Epic successfully deleted');
+        setIsDeleteDialogOpen(false);
       })
       .catch(() => {
         toast.error('Error deleting epic');
@@ -362,6 +363,19 @@ function Board({ socket }: { socket: ISocketWrapper }) {
       });
   };
 
+  const handleAcknowledgeNotification = (
+    notificationId: number,
+  ) => {
+    actions
+      .acknowledgeNotification(id, notificationId)
+      .then(res => {
+        toast.success('Success');
+      })
+      .catch(() => {
+        toast.error('Error');
+      });
+  };
+
   const { id: activeStoryId } = activeStory;
 
   const [activeNavigationTab, setActiveNavigationTab] = useState(NAVIGATION_LINKS.EPICS);
@@ -397,6 +411,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
 
   const boardApi = useMemo(
     () => ({
+      currentBoardId: id,
       delayedHandleEditStory,
       handleAddingDependency,
       handleShowDependencyArrows,
@@ -552,6 +567,7 @@ function Board({ socket }: { socket: ISocketWrapper }) {
                             <NotificationsList
                               notifications={notifications}
                               onAcceptOrRejectStoryRequest={handleAcceptOrRejectStoryRequest}
+                              onAcknowledgeNotification={handleAcknowledgeNotification}
                             />
                           </div>
                         </div>

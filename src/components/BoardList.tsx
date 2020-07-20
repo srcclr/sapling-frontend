@@ -68,6 +68,7 @@ function BoardList() {
     const { id: boardId } = boardToDelete;
     actions.deleteBoard(boardId).then(() => {
       toast.info('Deleted successfully');
+      setIsDeleteDialogOpen(false);
     });
   };
 

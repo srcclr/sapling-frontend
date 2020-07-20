@@ -5,25 +5,28 @@ import { Dropdown } from 'styles/ThemeComponents';
 import Loader from 'react-loader-spinner';
 
 const CrossBoardDependencies: React.FunctionComponent<{
+  currentBoardId: number;
   boardList: IBoard[];
   onBoardSelect: Function;
   data: ICrossBoardData;
   isFetching: boolean;
   onSubmitRequest: Function;
-}> = ({ boardList = [], onBoardSelect, data = {}, isFetching, onSubmitRequest, children }) => {
+}> = ({currentBoardId, boardList = [], onBoardSelect, data = {}, isFetching, onSubmitRequest, children}) => {
   const { sprints = [], epics = [], boardId } = data;
 
   const handleBoardSelect = (field, value) => {
     onBoardSelect(value);
   };
 
-  const boardListOptions = boardList.map(board => {
-    const { id, name } = board;
-    return {
-      value: id,
-      label: name,
-    };
-  });
+  const boardListOptions = boardList
+    .filter(board => board.id != currentBoardId)
+    .map(board => {
+      const {id, name} = board;
+      return {
+        value: id,
+        label: name,
+      };
+    });
 
   const epicOptions = epics.map(epic => {
     const { id, name } = epic;
@@ -52,7 +55,6 @@ const CrossBoardDependencies: React.FunctionComponent<{
     event.preventDefault();
     onSubmitRequest({ ...fieldValues, boardId });
   };
-
   return (
     <div>
       <Dropdown
