@@ -8,6 +8,7 @@ import { addDependency, deleteDependency } from 'types/utility';
 const initialState = {
   data: {},
   clients: [],
+  locked: [],
   isSolving: false,
   isInitialLoad: true,
   isFetching: false,
@@ -40,9 +41,10 @@ const boardState = (state: IBoardState = initialState, action: Actions) =>
       }
       case 'OPENED_BOARD': {
         asyncActionReducer(draft, action, ['isFetching'], () => {
-          const { board, clients } = action.payload.success;
+          const { board, clients, locked } = action.payload.success;
           draft.data = board;
           draft.clients = clients;
+          draft.locked = locked;
           draft.isInitialLoad = false;
         });
         return;

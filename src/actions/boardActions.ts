@@ -1,4 +1,4 @@
-import { ILoginParams, IStoryRequest, STORY_REQUEST_ACTION } from '../types';
+import { ILoginParams, IStoryRequest, STORY_REQUEST_ACTION, ILockedElementInfo, IClient } from '../types';
 import ApiService from 'utils/ApiService';
 import config from 'utils/config';
 import { ISprint, IStory, IBoard } from 'types';
@@ -247,6 +247,6 @@ export function editingStory(
   return {
     type: 'OPENED_BOARD',
     sendMessage: () => socketWrapper.send(message),
-    payload: { request: { data: { message } }, success: { board: {} as any } },
+    payload: { request: { data: { message } }, success: { board: {} as IBoard, clients: [] as IClient[], locked: [] as ILockedElementInfo[] } },
   } as const;
 }

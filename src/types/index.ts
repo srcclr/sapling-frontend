@@ -82,6 +82,11 @@ export interface IStoryRequestWithViewData extends IStoryRequest {
   storyEpicName?: string;
 }
 
+export interface ILockedElementInfo {
+  element: {type: string, board: number, story: number},
+  user: IClient
+}
+
 export interface IClient {
   email?: string;
   uuid?: string;

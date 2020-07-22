@@ -1,7 +1,7 @@
 import React, { useState, useContext, createRef, useEffect } from 'react';
 import _ from 'lodash';
 import { ArcherElement } from 'react-archer';
-import { IStory, STORY_REQUEST_ACTION, IStoryRequestWithViewData } from 'types';
+import { IStory, STORY_REQUEST_ACTION, IStoryRequestWithViewData, ILockedElementInfo } from 'types';
 import { Trash, X, MoreVertical, PlusSquare, GitPullRequest } from 'react-feather';
 import { useForm } from 'react-hook-form';
 import { useOnClickOutside } from 'hooks';
@@ -10,6 +10,7 @@ import classnames from 'classnames';
 import CrossBoardDependencies from './CrossBoardDependencies';
 import CrossBoardDependenciesList from './CrossBoardDependenciesList';
 import { BoardContext } from './Board';
+import ClientBadge from './ClientBadge';
 
 interface IStoryProps {
   isLoading: boolean;
@@ -40,6 +41,8 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
 
   const {
     currentBoardId,
+    locked,
+    clientColors,
     delayedHandleEditStory,
     handleClientEditingStory,
     handleAddingDependency,
@@ -61,6 +64,15 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     activeDepArrowsStory,
   } = board;
 
+
+  const lockElementInfo:ILockedElementInfo = locked && locked.length > 0 && locked.find((lockedInfo: ILockedElementInfo) => {
+    const { element } = lockedInfo;
+    const { story } = element;
+    return story === id;
+  });
+
+  const isLocked = !!lockElementInfo;
+
   /**
    * We send a message to update the server on whether the user or the client
    * is editing this story. Editing the story means isActive is true and
@@ -81,10 +93,14 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     [isActive, clientEditingStoryDoneState]
   );
 
-  // storyRefs is an object containing all the refs returned by the useMultipleRects
-  // for purposes of tracking ticket DOM dimentions and positions. For now, we only do this for
-  // tickets under Sprints section, so expect that sotryRefs does not contain ticket Ids from Backlog.
-  // For Backlog tickets, we separately use createRef.
+
+  /**
+   * toryRefs is an object containing all the refs returned by the useMultipleRects
+   * for purposes of tracking ticket DOM dimentions and positions. For now, we only do this for
+   * tickets under Sprints section, so expect that sotryRefs does not contain ticket Ids from Backlog.
+   * For Backlog tickets, we separately use createRef.
+   */
+   
   const ref = storyRefs[id] || createRef();
 
   useOnClickOutside(ref, () => {
@@ -238,11 +254,16 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     [];
   return (
     <div
-      className={`story ${storyClassNames}`}
+      className={`story relative ${storyClassNames}`}
       onClick={isDependencyCandidate ? () => handleAddAsDependency(id) : null}
       ref={ref}
     >
-      {' '}
+      {isLocked && 
+        <div className="lock-details">
+          <ClientBadge hexColor={clientColors[lockElementInfo.user.uuid]} client={lockElementInfo.user} hideInitial={true} />
+        </div>
+      }
+      
       <ArcherElement
         id={`story-${id}`}
         relations={relations}
@@ -250,19 +271,20 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
       >
         <div
           className={`flex-grow p-4 flex overflow-hidden flex-row items-start justify-between relative `}
-          onClick={!isDependencyCandidate ? () => setIsActive(true) : null}
+          onClick={!isDependencyCandidate && !isLocked ? () => setIsActive(true) : null}
         >
           <div className="">
             <div className="">
-              {!isActive ? (
-                <div className="flex-grow">
+              {!isActive || isLocked ? (
+                <div className={`flex-grow ${isLocked ? 'opacity-75 cursor-default' : ''}`}>
                   <DetailsView
                     description={defaultValues.description}
                     id={id}
                     weight={defaultValues.weight}
                     epicName={defaultValues.epicName}
                     sprintName={defaultValues.sprintName}
-                    onClick={!isDependencyCandidate ? toggleActive : null}
+                    onClick={!isDependencyCandidate && !isLocked ? toggleActive : null}
+                    isLocked={isLocked}
                   />
                 </div>
               ) : (
@@ -348,7 +370,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
               <div className="tag rounded-lg text-center">{id}</div>
             </div>
             <div className=" h-6 w-6 flex flex-row items-center justify-center">
-              {!crossBoardDependents ? (
+              {!crossBoardDependents && !isLocked ? (
                 <Trash size="16" className="clickable" onClick={handleDelete} />
               ) : (
                 ''
@@ -491,9 +513,9 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
   );
 };
 
-const DetailsView = ({ id, description, weight, epicName, sprintName, onClick }) => {
+const DetailsView = ({ id, description, weight, epicName, sprintName, onClick, isLocked }) => {
   return (
-    <div className="w-full flex cursor-pointer bg-white" onClick={onClick}>
+    <div className={`w-full flex ${!isLocked ? `cursor-pointer` : ''} bg-white`} onClick={onClick}>
       <div className="flex-grow">
         <div className="text-sm font-semibold mb-2">{description} </div>
         <div className="text-xs ">Story Points: {weight} </div>

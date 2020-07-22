@@ -195,8 +195,12 @@ textarea {
   transition: height 0.2s ease;
 }
 
+.story .lock-details {
+  @apply absolute top-0 right-0 z-10;
+}
+
 .pill {
-  @apply text-xs rounded-full bg-gray-200 py-1 px-2 mr-1 inline-block text-gray-800 cursor-pointer border-b-2;
+  @apply text-xs rounded-md bg-gray-200 py-1 px-2 mr-1 inline-block text-gray-800 cursor-pointer border-b-2;
 }
 
 .pill.active {

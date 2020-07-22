@@ -111,7 +111,8 @@ function Board({ socket }: { socket: ISocketWrapper }) {
 
   const {
     data: board = {},
-    clients,
+    clients = [],
+    locked = [],
     isInitialLoad,
     isFetching,
     isSolving,
@@ -428,6 +429,8 @@ function Board({ socket }: { socket: ISocketWrapper }) {
   const boardApi = useMemo(
     () => ({
       currentBoardId: id,
+      clientColors,
+      locked,
       delayedHandleEditStory,
       handleClientEditingStory,
       handleAddingDependency,
@@ -457,6 +460,8 @@ function Board({ socket }: { socket: ISocketWrapper }) {
       storyRefs,
       storyRects,
       activeDepArrowsStory,
+      JSON.stringify(clientColors), // Todo: look for alternative to stringify. hash?
+      JSON.stringify(locked)
     ]
   );
 
