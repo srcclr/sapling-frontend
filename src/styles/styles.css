@@ -196,7 +196,6 @@ textarea {
 }
 
 .story .lock-details {
-  @apply absolute top-0 right-0 z-10;
 }
 
 .pill {
@@ -290,6 +289,21 @@ textarea {
 .arrows-container.inactive > svg {
   @apply hidden;
   pointer-events: none;
+}
+
+.blink {
+  animation: blinker 2s infinite;
+}
+
+@keyframes blinker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes square-spinner {

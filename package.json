@@ -66,6 +66,7 @@
     "react-feather": "2.0.3",
     "react-hook-form": "5.0.1",
     "react-loader-spinner": "3.1.5",
+    "react-popper-tooltip": "3.1.0",
     "react-redux": "7.2.0",
     "react-router-dom": "5.1.2",
     "react-split-pane": "0.1.87",

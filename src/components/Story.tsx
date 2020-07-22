@@ -64,12 +64,14 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     activeDepArrowsStory,
   } = board;
 
-
-  const lockElementInfo:ILockedElementInfo = locked && locked.length > 0 && locked.find((lockedInfo: ILockedElementInfo) => {
-    const { element } = lockedInfo;
-    const { story } = element;
-    return story === id;
-  });
+  const lockElementInfo: ILockedElementInfo =
+    locked &&
+    locked.length > 0 &&
+    locked.find((lockedInfo: ILockedElementInfo) => {
+      const { element } = lockedInfo;
+      const { story } = element;
+      return story === id;
+    });
 
   const isLocked = !!lockElementInfo;
 
@@ -93,14 +95,13 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
     [isActive, clientEditingStoryDoneState]
   );
 
-
   /**
    * toryRefs is an object containing all the refs returned by the useMultipleRects
    * for purposes of tracking ticket DOM dimentions and positions. For now, we only do this for
    * tickets under Sprints section, so expect that sotryRefs does not contain ticket Ids from Backlog.
    * For Backlog tickets, we separately use createRef.
    */
-   
+
   const ref = storyRefs[id] || createRef();
 
   useOnClickOutside(ref, () => {
@@ -258,12 +259,6 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
       onClick={isDependencyCandidate ? () => handleAddAsDependency(id) : null}
       ref={ref}
     >
-      {isLocked && 
-        <div className="lock-details">
-          <ClientBadge hexColor={clientColors[lockElementInfo.user.uuid]} client={lockElementInfo.user} hideInitial={true} />
-        </div>
-      }
-      
       <ArcherElement
         id={`story-${id}`}
         relations={relations}
@@ -372,6 +367,15 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
             <div className=" h-6 w-6 flex flex-row items-center justify-center">
               {!crossBoardDependents && !isLocked ? (
                 <Trash size="16" className="clickable" onClick={handleDelete} />
+              ) : isLocked ? (
+                <div className="lock-details">
+                  <ClientBadge
+                    hexColor={clientColors[lockElementInfo.user.uuid]}
+                    client={lockElementInfo.user}
+                    tooltip={`${lockElementInfo.user.email} is editing`}
+                    hideInitial={true}
+                  />
+                </div>
               ) : (
                 ''
               )}
@@ -515,7 +519,10 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
 
 const DetailsView = ({ id, description, weight, epicName, sprintName, onClick, isLocked }) => {
   return (
-    <div className={`w-full flex ${!isLocked ? `cursor-pointer` : ''} bg-white`} onClick={onClick}>
+    <div
+      className={`w-full flex  ${!isLocked ? `cursor-pointer ` : 'blink'} bg-white`}
+      onClick={onClick}
+    >
       <div className="flex-grow">
         <div className="text-sm font-semibold mb-2">{description} </div>
         <div className="text-xs ">Story Points: {weight} </div>
