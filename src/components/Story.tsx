@@ -374,6 +374,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
                     client={lockElementInfo.user}
                     tooltip={`${lockElementInfo.user.email} is editing`}
                     hideInitial={true}
+                    animate={true}
                   />
                 </div>
               ) : (
@@ -519,10 +520,7 @@ const Story: React.FunctionComponent<IStory & IStoryProps> = ({
 
 const DetailsView = ({ id, description, weight, epicName, sprintName, onClick, isLocked }) => {
   return (
-    <div
-      className={`w-full flex  ${!isLocked ? `cursor-pointer ` : 'blink'} bg-white`}
-      onClick={onClick}
-    >
+    <div className={`w-full flex  ${!isLocked ? `cursor-pointer` : ''} bg-white`} onClick={onClick}>
       <div className="flex-grow">
         <div className="text-sm font-semibold mb-2">{description} </div>
         <div className="text-xs ">Story Points: {weight} </div>

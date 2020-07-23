@@ -291,11 +291,11 @@ textarea {
   pointer-events: none;
 }
 
-.blink {
-  animation: blinker 2s infinite;
+.fade-in-out {
+  animation: fade-in-out-animation 2s infinite;
 }
 
-@keyframes blinker {
+@keyframes fade-in-out-animation {
   0%,
   100% {
     opacity: 1;
